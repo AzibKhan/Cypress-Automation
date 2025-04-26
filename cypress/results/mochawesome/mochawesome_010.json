@@ -1,0 +1,126 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 2,
+    "passes": 2,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-03-17T19:03:12.958Z",
+    "end": "2025-03-17T19:03:21.751Z",
+    "duration": 8793,
+    "testsRegistered": 2,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "d2b944ad-d909-43a6-9639-582c7d79e109",
+      "title": "",
+      "fullFile": "cypress/e2e/WebDriver-Uni/contact-us.js",
+      "file": "cypress/e2e/WebDriver-Uni/contact-us.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "ae4219a2-1959-46d9-bdad-d9202829e510",
+          "title": "Test Contact Us form via WebdriverUni",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Should be able to submit a successful submission via contact us form",
+              "fullTitle": "Test Contact Us form via WebdriverUni Should be able to submit a successful submission via contact us form",
+              "timedOut": null,
+              "duration": 4180,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "//cy.visit(\"http://www.webdriveruniversity.com/Contact-Us/contactus.html\");\ncy.visit(\"https://www.webdriveruniversity.com\");\ncy.get('#contact-us').invoke('removeAttr', 'target').click({\n  force: true\n});\ncy.document().should('have.property', 'charset').and('eq', 'UTF-8');\ncy.title().should('include', 'WebDriver | Contact Us');\ncy.url().should('include', 'contactus');\n//cy.get('#contact-us').click({force: true})\ncy.get('[name=\"first_name\"]').type(data.first_name);\ncy.get('[name=\"last_name\"]').type(data.last_name);\ncy.get('[name=\"email\"]').type(data.email);\ncy.get('textarea.feedback-input').type(\"How can I learn Cypress?\");\ncy.get('[type=\"submit\"]').click();\ncy.get('h1').should('have.text', 'Thank You for your Message!');",
+              "err": {},
+              "uuid": "e45c9b34-3799-430a-b2c2-dade3e5a9747",
+              "parentUUID": "ae4219a2-1959-46d9-bdad-d9202829e510",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Should not be able to submit a successful submission via contact us form as all fields are required",
+              "fullTitle": "Test Contact Us form via WebdriverUni Should not be able to submit a successful submission via contact us form as all fields are required",
+              "timedOut": null,
+              "duration": 2697,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "//cy.visit(\"http://www.webdriveruniversity.com/Contact-Us/contactus.html\");\ncy.visit(\"http://www.webdriveruniversity.com\");\ncy.get('#contact-us').invoke('removeAttr', 'target').click({\n  force: true\n});\ncy.get('[name=\"first_name\"]').type(data.first_name);\ncy.get('[name=\"last_name\"]').type(data.last_name);\ncy.get('textarea.feedback-input').type(\"How can I learn Cypress?\");\ncy.get('[type=\"submit\"]').click();\ncy.get('body').contains('Error: all fields are required');",
+              "err": {},
+              "uuid": "65d9501e-bdd1-4f80-8bee-ff29ef0848a0",
+              "parentUUID": "ae4219a2-1959-46d9-bdad-d9202829e510",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "e45c9b34-3799-430a-b2c2-dade3e5a9747",
+            "65d9501e-bdd1-4f80-8bee-ff29ef0848a0"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 6877,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "id": "default",
+        "reportDir": "cypress/results/mochawesome",
+        "quite": true,
+        "overwrite": false,
+        "html": false,
+        "json": true
+      },
+      "version": "6.2.0"
+    }
+  }
+}

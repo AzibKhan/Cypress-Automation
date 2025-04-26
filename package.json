@@ -1,0 +1,47 @@
+{
+  "name": "cypress-automation-framework",
+  "version": "1.0.0",
+  "description": "Cypress Automation Framework",
+  "main": "index.js",
+  "scripts": {
+    "triggerAllTests-headless": "npx cypress run",
+    "triggerAllTests-headed": "npx cypress run --headed",
+    "triggerAllTests-chrome": "npx cypress run --browser chrome",
+    "triggerAllTests-dashboard": "npx cypress run --record --key 8ea00e6c-0795-4bca-ad07-ed0a158d3f30",
+    "triggerAllTests-webdriveruni": "npx cypress run --spec cypress/e2e/webdriver-uni/*",
+    "triggerAllTests-webdriveruni-dashboard": "npx cypress run --spec cypress/e2e/webdriver-uni/* --record --key 8ea00e6c-0795-4bca-ad07-ed0a158d3f30 --parallel --browser chrome --headed",
+    "triggerAllTests-autostore": "npx cypress run --spec cypress/e2e/automation-test-store/*",
+    "triggerAllTests-autostore-dashboard": "npx cypress run --spec cypress/e2e/automation-test-store/* --record --key 8ea00e6c-0795-4bca-ad07-ed0a158d3f30 --parallel --browser chrome --headed",
+    "triggerAllTests-cucumberTests": "npx cypress run --spec cypress/e2e/webdriver-uni/features/*.feature --browser chrome",
+    "junit-merge": "npx junit-merge -d cypress/results/junit -o cypress/results/junit/results.xml",
+    "delete-junit-report": "rm -rf cypress/results/junit/results.xml",
+    "delete-results": "rm -rf cypress/results/* || true",
+    "mochawesome-merge": "npx mochawesome-merge cypress/results/mochawesome/*.json > mochawesome.json && npx marge mochawesome.json",
+    "delete-mochawesome-report": "rm -rf mochawesome-report/* || true",
+    "cypress-regression-pack": "npm run delete-results && npm run delete-mochawesome-report && npm run triggerAllTests-headless && npm run mochawesome-merge",
+    "triggerAllTests-staging": "npx cypress run --env configFile=staging",
+    "cypress-multi-browser": "npm run triggerAllTests-autostore -- --browser electron --headed & npm run triggerAllTests-autostore -- --browser edge --headed"
+  },
+  "author": "Azib Khan",
+  "license": "ISC",
+  "devDependencies": {
+    "@badeball/cypress-cucumber-preprocessor": "^22.0.1",
+    "@bahmutov/cypress-esbuild-preprocessor": "^2.2.4",
+    "@cypress/browserify-preprocessor": "^3.0.2",
+    "cypress": "^14.3.2",
+    "cypress-cucumber-preprocessor": "^4.3.1",
+    "cypress-multi-reporters": "^1.6.1",
+    "cypress-xpath": "^2.0.1",
+    "mocha-junit-reporter": "^2.0.2",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.2.1",
+    "mochawesome-report-generator": "^6.2.0"
+  },
+  "cypress-cucumber-preprocessor": {
+    "nonGlobalStepDefinitions": false,
+    "stepDefinitions": "cypress/e2e/Pipedrive/Web/step-defination"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.7.0"
+  }
+}
