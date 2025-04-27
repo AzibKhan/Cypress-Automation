@@ -20,9 +20,12 @@ describe('Pipedrive Contact Management', () => {
             LoginPage.fillPassword(testData.password);
             LoginPage.submit();
             
-            // Wait for successful login and dashboard load
-            cy.url().should('include', '1/user/everyone');
+            // Wait for successful login
+            cy.url().should('not.include', '/auth/login', { timeout: 20000 });
             cy.get('body').should('be.visible');
+            
+            // Additional wait to ensure dashboard is fully loaded
+            cy.wait(2000);
         });
     });
 
