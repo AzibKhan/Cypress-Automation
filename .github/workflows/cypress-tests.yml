@@ -28,6 +28,8 @@ jobs:
         with:
           browser: chrome
           headless: true
+          record: false
+          install: false
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
