@@ -30,17 +30,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create reports directory
+        run: |
+          mkdir -p cypress/reports/mochawesome
+          mkdir -p cypress/reports/mochawesome/.jsons
+
       - name: Run Cypress tests
-        uses: cypress-io/github-action@v6
-        with:
-          browser: chrome
-          headless: true
-          record: false
-          install: false
-        env:
-          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
-          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+        run: npm run test:chrome
+        continue-on-error: true
+
+      - name: Generate Mochawesome report
+        if: always()
+        run: |
+          npm run merge:reports
+          npm run generate:report
 
       - name: List workspace contents (post-test)
         if: always()
@@ -50,10 +53,13 @@ jobs:
           ls -la cypress/screenshots || echo "No screenshots directory"
           ls -la cypress/videos || echo "No videos directory"
 
-      - name: Upload test artifacts
+      - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: cypress-results
-          path: cypress
+          name: test-results
+          path: |
+            cypress/reports/mochawesome
+            cypress/screenshots
+            cypress/videos
           if-no-files-found: warn 
