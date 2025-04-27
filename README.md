@@ -76,6 +76,43 @@ npx cypress open
 npx cypress run
 ```
 
+## Docker Setup
+
+### Prerequisites
+- Docker Desktop installed and running
+- Docker Compose installed
+
+### Running Tests with Docker
+
+1. **Build and Run Tests**:
+```bash
+# Run all tests in headless mode
+./run-cypress-docker.sh
+
+# Open Cypress UI in Docker
+./run-cypress-docker.sh --open
+```
+
+2. **Using Docker Compose Directly**:
+```bash
+# Build the Docker image
+docker-compose build
+
+# Run tests
+docker-compose run --rm cypress
+
+# Run a specific test file
+docker-compose run --rm cypress npx cypress run --spec "cypress/e2e/Pipedrive/Web/tests/01_login_test.cy.js"
+```
+
+3. **Viewing Test Results**:
+Test results, screenshots, and videos will be available in your local project directory as they are mounted as volumes.
+
+### Docker Configuration
+- `Dockerfile`: Defines the Cypress environment
+- `docker-compose.yml`: Configures the service and volumes
+- `.dockerignore`: Excludes unnecessary files from the build
+
 ## GitHub Actions Setup
 
 ### Required Secrets

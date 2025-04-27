@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  cypress:
+    build: .
+    volumes:
+      - ./cypress:/e2e/cypress
+      - ./cypress.config.js:/e2e/cypress.config.js
+      - ./package.json:/e2e/package.json
+      - ./package-lock.json:/e2e/package-lock.json
+      - ./cypress.env.json:/e2e/cypress.env.json
+    environment:
+      - CYPRESS_BASE_URL=https://app.pipedrive.com
+    command: npx cypress run 
