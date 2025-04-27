@@ -35,12 +35,18 @@ jobs:
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
 
-      - name: Upload test artifacts
-        if: always()
+      - name: Upload screenshots
         uses: actions/upload-artifact@v3
+        if: failure()
         with:
-          name: cypress-artifacts
-          path: |
-            cypress/screenshots
-            cypress/videos
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
           if-no-files-found: ignore 
