@@ -4,7 +4,7 @@ describe('Pipedrive Login Test', () => {
     let userData;
 
     beforeEach(() => {
-        cy.fixture('ContactDAta').then((data) => {
+        cy.fixture('contactData').then((data) => {
             userData = data;
             LoginPage.visit();
         });
