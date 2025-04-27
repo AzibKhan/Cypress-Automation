@@ -35,20 +35,14 @@ jobs:
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
 
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v3
-        if: failure()
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots
-          if-no-files-found: ignore
-
-      - name: Upload videos
-        uses: actions/upload-artifact@v3
+      - name: Upload test artifacts
         if: always()
+        uses: actions/upload-artifact@v3
         with:
-          name: cypress-videos
-          path: cypress/videos
+          name: cypress-artifacts
+          path: |
+            cypress/screenshots
+            cypress/videos
           if-no-files-found: ignore
 
   notify:
@@ -56,9 +50,6 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
-
       - name: Notify Slack on Success
         if: success()
         uses: slackapi/slack-github-action@v1.24.0
