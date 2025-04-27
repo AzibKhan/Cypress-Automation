@@ -5,27 +5,23 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-
-      - name: List workspace contents (pre-test)
-        run: |
-          pwd
-          ls -la
-          npm -v
-          node -v
 
       - name: Install dependencies
         run: npm ci
@@ -36,6 +32,7 @@ jobs:
           mkdir -p cypress/reports/mochawesome/.jsons
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
+          chmod -R 777 cypress
 
       - name: Run Cypress tests
         run: npm run test:chrome
@@ -54,37 +51,28 @@ jobs:
       - name: List workspace contents (post-test)
         if: always()
         run: |
-          echo "Current directory:"
-          pwd
-          echo "Cypress directory structure:"
-          find cypress -type d
-          echo "Files in cypress/reports/mochawesome:"
-          ls -la cypress/reports/mochawesome || echo "No mochawesome directory"
-          echo "Files in cypress/screenshots:"
-          ls -la cypress/screenshots || echo "No screenshots"
-          echo "Files in cypress/videos:"
-          ls -la cypress/videos || echo "No videos"
+          echo "Current directory structure:"
+          tree cypress || find cypress -type d
+          echo -e "\nFile permissions in cypress directory:"
+          ls -lR cypress
 
-      - name: Upload reports
+      - name: Prepare artifacts
         if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: mochawesome-report
-          path: cypress/reports/mochawesome
-          if-no-files-found: warn
+        run: |
+          # Create a single directory for all artifacts
+          mkdir -p artifact_upload
+          # Copy only if they exist and have content
+          [ -d "cypress/reports/mochawesome" ] && cp -r cypress/reports/mochawesome artifact_upload/ || echo "No mochawesome reports"
+          [ -d "cypress/screenshots" ] && cp -r cypress/screenshots artifact_upload/ || echo "No screenshots"
+          [ -d "cypress/videos" ] && cp -r cypress/videos artifact_upload/ || echo "No videos"
+          echo "Contents of artifact_upload directory:"
+          ls -lR artifact_upload
 
-      - name: Upload screenshots
+      - name: Upload all artifacts
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          name: screenshots
-          path: cypress/screenshots
-          if-no-files-found: warn
-
-      - name: Upload videos
-        if: always()
-        uses: actions/upload-artifact@v2
-        with:
-          name: videos
-          path: cypress/videos
+          name: cypress-artifacts
+          path: artifact_upload
+          retention-days: 5
           if-no-files-found: warn 
