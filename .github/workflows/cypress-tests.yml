@@ -10,9 +10,6 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -45,34 +42,34 @@ jobs:
       - name: Generate Mochawesome report
         if: always()
         run: |
+          echo "Current directory structure:"
+          find cypress -type d
+          echo -e "\nGenerating reports..."
           npm run merge:reports || echo "Failed to merge reports"
           npm run generate:report || echo "Failed to generate report"
+          echo -e "\nReport directory contents:"
+          ls -R cypress/reports/mochawesome
 
-      - name: List workspace contents (post-test)
-        if: always()
-        run: |
-          echo "Current directory structure:"
-          tree cypress || find cypress -type d
-          echo -e "\nFile permissions in cypress directory:"
-          ls -lR cypress
-
-      - name: Prepare artifacts
-        if: always()
-        run: |
-          # Create a single directory for all artifacts
-          mkdir -p artifact_upload
-          # Copy only if they exist and have content
-          [ -d "cypress/reports/mochawesome" ] && cp -r cypress/reports/mochawesome artifact_upload/ || echo "No mochawesome reports"
-          [ -d "cypress/screenshots" ] && cp -r cypress/screenshots artifact_upload/ || echo "No screenshots"
-          [ -d "cypress/videos" ] && cp -r cypress/videos artifact_upload/ || echo "No videos"
-          echo "Contents of artifact_upload directory:"
-          ls -lR artifact_upload
-
-      - name: Upload all artifacts
+      - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-artifacts
-          path: artifact_upload
+          name: mochawesome-report
+          path: cypress/reports/mochawesome
           retention-days: 5
-          if-no-files-found: warn 
+
+      - name: Upload Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          retention-days: 5
+
+      - name: Upload Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          retention-days: 5 
