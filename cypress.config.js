@@ -1,7 +1,6 @@
 const { defineConfig } = require("cypress");
 const fs = require('fs-extra');
 const path = require('path');
-const { addCucumberPreprocessorPlugin } = require("@badeball/cypress-cucumber-preprocessor");
 
 function getConfigurationByFile(file) {
   const pathToConfigFile = path.join('cypress', 'config', `${file}.json`);
@@ -16,38 +15,46 @@ function getConfigurationByFile(file) {
 
 module.exports = defineConfig({
   projectId: 'mevvq9',
+  reporter: 'cypress-mochawesome-reporter',
+  reporterOptions: {
+    charts: true,
+    reportDir: 'cypress/reports/mochawesome',
+    reportFilename: '[name]-[status]-[datetime]',
+    timestamp: 'yyyy-mm-dd-HH-MM-ss',
+    overwrite: false,
+    html: true,
+    json: true,
+    embeddedScreenshots: true,
+    inlineAssets: true,
+    saveAllAttempts: false
+  },
   e2e: {
-    setupNodeEvents: async (on, config) => {
-      await addCucumberPreprocessorPlugin(on, config);
-    
+    setupNodeEvents(on, config) {
+      require('cypress-mochawesome-reporter/plugin')(on);
+      
       const file = config.env.configFile || '';
-      const fileConfig = await getConfigurationByFile(file);
+      const fileConfig = getConfigurationByFile(file);
     
       return { ...config, ...fileConfig };
     },
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
-    //excludeSpecPattern: "cypress/e2e/other/*.js",
-    baseUrl: "https://app.pipedrive.com/",
+    baseUrl: process.env.CYPRESS_BASE_URL || 'https://app.pipedrive.com',
     chromeWebSecurity: false,
-    experimentalSessionAndOrigin: true,
     defaultCommandTimeout: 10000,
     pageLoadTimeout: 120000,
     screenshotOnRunFailure: true,
     trashAssetsBeforeRuns: true,
-    video: false,
-    videoUploadOnPasses: false,
-    viewportHeight: 1080,
-    viewportWidth: 1920,
-    reporter: 'cypress-multi-reporters',
-    reporterOptions: {
-      configFile: 'reporter-config.json'
-    },
+    video: true,
+    viewportHeight: 720,
+    viewportWidth: 1280,
     retries: {
-      runMode: 0,
+      runMode: 2,
       openMode: 0
     },
     env: {
       webdriveruni_homepage: "https://app.pipedrive.com/",
+      email: "azib.pipedrive@gmail.com",
+      password: "pipedrive1234",
     }
   },
 });

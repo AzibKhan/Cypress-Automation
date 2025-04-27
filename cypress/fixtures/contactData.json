@@ -4,6 +4,9 @@
     "contactName": "Nike",
     "owner": "Azib Khan",
     "address": "10123 toom kuninga 15",
-    "contactType": "Customer"
+    "contactType": "Customer",
+    "phoneNumber": "1234567890",
+    "emailaddress": "jacob@yopmail.com",
+    "organization": "Nike Company"
   }
   
