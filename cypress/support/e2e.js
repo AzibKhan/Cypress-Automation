@@ -18,3 +18,9 @@ import './commands'
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+// Ignore ResizeObserver errors globally
+Cypress.on('uncaught:exception', (err) => {
+    if (err.message.includes('ResizeObserver')) {
+      return false; // Prevent Cypress from failing the test
+    }
+  });

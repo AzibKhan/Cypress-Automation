@@ -13,16 +13,16 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
-
+            
       - name: Install dependencies
         run: npm ci
-
+        
       - name: Create reports directory
         run: |
           mkdir -p cypress/reports/mochawesome
@@ -30,7 +30,7 @@ jobs:
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
-
+        
       - name: Run Cypress tests
         run: npm run test:chrome
         continue-on-error: true
@@ -38,7 +38,7 @@ jobs:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-
+          
       - name: Generate Mochawesome report
         if: always()
         run: |

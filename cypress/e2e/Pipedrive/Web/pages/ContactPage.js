@@ -14,10 +14,10 @@ class ContactPage {
     get saveButton() { return cy.contains('button', 'Save'); }
     
     // Delete contact selectors
-    get selectAllCheckbox() { return cy.get('label[data-cy="select-all"]').find('input[type="checkbox"]'); }
-    get deleteButton() { return cy.get('[data-test="bulk-edit-delete-async"]'); }
+    get selectAllCheckbox() { return cy.get('[data-cy="select-all"]'); }
+    get deleteButton() { return cy.get('#delete'); }
     get confirmDeleteButton() { return cy.contains('button', 'Delete'); }
-    get successMessage() { return cy.contains("deleted successfully"); }
+    get successMessage() { return cy.contains('deleted successfully'); }
 
     // Actions
     visit() {
@@ -49,6 +49,42 @@ class ContactPage {
         cy.get('[data-test-key="name"]').should('be.visible');
     }
 
+    // New methods for filling individual fields
+    fillEmailField(emailAddress) {
+        if (emailAddress) {
+            this.emailInput.should('be.visible').should('be.enabled')
+                .clear()
+                .type(emailAddress, { delay: 100 });
+        }
+    }
+
+    fillNameField(contactName) {
+        if (contactName) {
+            this.nameInput.should('be.visible').should('be.enabled')
+                .clear()
+                .type(contactName, { delay: 100 });
+        }
+    }
+
+    fillOrganizationField(organization) {
+        if (organization) {
+            this.orgInput.should('be.visible').should('be.enabled')
+                .clear()
+                .type(organization, { delay: 100 });
+            cy.wait(500); // Wait for suggestions
+            this.addNewOrgButton.should('be.visible').click();
+        }
+    }
+
+    fillPhoneField(phoneNumber) {
+        if (phoneNumber) {
+            this.phoneInput.should('be.visible').should('be.enabled')
+                .clear()
+                .type(phoneNumber, { delay: 100 });
+        }
+    }
+
+    // Original method kept for backward compatibility
     fillContactForm(contactName, organization, phoneNumber, emailAddress) {
         // Fill name with retry if needed
         if (contactName) {
@@ -108,41 +144,54 @@ class ContactPage {
     verifyValidationMessage(message) {
         cy.contains(message, { timeout: 5000 }).should('be.visible');
     }
-    
-    // Delete contact actions
+
     selectAllContacts() {
-        cy.wait(1000); // Wait for list to load
-        this.selectAllCheckbox.should('be.visible').check({ force: true });
+        // Wait for the contacts list to be loaded
+        cy.wait(3000);
+        
+        // Ensure we're on the contacts page and list is loaded
+        cy.get('[data-cy="select-all"]').should('be.visible');
+        
+        // Click the select all checkbox
+        this.selectAllCheckbox
+            .should('be.visible')
+            .click();
+        
+        // Wait for selection to take effect
+        cy.wait(2000);
     }
-    
+
     deleteSelectedContacts() {
-        cy.wait(500); // Wait for selection to register
-        this.deleteButton.should('be.visible').should('not.be.disabled').click();
+        // Wait for delete button to be enabled and visible
+        this.deleteButton
+            .should('be.visible')
+            .should('not.be.disabled')
+            .click();
     }
-    
+
     confirmDeletion() {
-        cy.wait(500); // Wait for modal
-        this.confirmDeleteButton.should('be.visible').should('not.be.disabled').click();
+        // Wait for confirmation dialog and click delete
+        this.confirmDeleteButton
+            .should('be.visible')
+            .should('not.be.disabled')
+            .click();
     }
-    
-    verifyDeletionSuccess() {
-        // Wait for the success message to appear
-        cy.contains('deleted successfully', { timeout: 10000 }).should('be.visible');
-    }
-    
-    verifyContactDeleted(contactName) {
-        // Verify the contact is no longer visible
-        cy.contains(contactName, { timeout: 5000 }).should('not.exist');
-    }
-    
-    // Combined method for deleting contacts
+
     deleteContact() {
+        // Visit the contacts page first
         this.visit();
-        cy.wait(1000); // Wait for page to be fully loaded
+        
+        // Select all contacts
         this.selectAllContacts();
+        
+        // Delete selected contacts
         this.deleteSelectedContacts();
+        
+        // Confirm deletion
         this.confirmDeletion();
-        this.verifyDeletionSuccess();
+        
+        // Verify deletion success
+        this.successMessage.should('be.visible');
     }
 }
 

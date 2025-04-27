@@ -86,8 +86,8 @@ cypress/
 
 4. **Open Cypress Test Runner**:
    ```bash
-   npm run cypress:open
-   ```
+  npm run cypress:open
+  ```
 
 ### Additional Scripts
 

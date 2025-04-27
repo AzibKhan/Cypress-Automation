@@ -34,14 +34,22 @@ module.exports = defineConfig({
       
       const file = config.env.configFile || '';
       const fileConfig = getConfigurationByFile(file);
-    
+      
+      // Handle uncaught exceptions properly
+      on('task', {
+        log(message) {
+          console.log(message);
+          return null;
+        }
+      });
+
       return { ...config, ...fileConfig };
     },
     specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
     baseUrl: process.env.CYPRESS_BASE_URL || 'https://app.pipedrive.com',
     chromeWebSecurity: false,
     defaultCommandTimeout: 10000,
-    pageLoadTimeout: 120000,
+    pageLoadTimeout: 30000,
     screenshotOnRunFailure: true,
     trashAssetsBeforeRuns: true,
     video: true,
@@ -55,6 +63,7 @@ module.exports = defineConfig({
       webdriveruni_homepage: "https://app.pipedrive.com/",
       email: "azib.pipedrive@gmail.com",
       password: "pipedrive1234",
-    }
+    },
+
   },
 });
