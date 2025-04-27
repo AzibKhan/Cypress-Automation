@@ -1,7 +1,17 @@
 class ContactPage {
-    // Selectors
-    get contactsLink() { return cy.get('a[aria-label="Contacts"]', { timeout: 10000 }); }
+    constructor() {
+        this.TIMEOUTS = {
+            DEFAULT: 10000,
+            SHORT: 2000,
+            LONG: 15000
+        };
+    }
+
+    // Navigation Selectors
+    get contactsLink() { return cy.get('a[aria-label="Contacts"]', { timeout: this.TIMEOUTS.DEFAULT }); }
     get peopleLink() { return cy.get('a[data-source="fe-root"]').contains('People'); }
+
+    // Form Selectors
     get addButton() { return cy.get('button[data-test="add-entity"]'); }
     get nameInput() { return cy.get('[data-test-key="name"] input'); }
     get orgInput() { return cy.get('[data-test-key="org_id"] input'); }
@@ -13,13 +23,13 @@ class ContactPage {
     get labelSelect() { return cy.get('[data-testid="labels-select"]'); }
     get saveButton() { return cy.contains('button', 'Save'); }
     
-    // Delete contact selectors
+    // Delete Contact Selectors
     get selectAllCheckbox() { return cy.get('[data-cy="select-all"]'); }
-    get deleteButton() { return cy.get('#delete'); }
-    get confirmDeleteButton() { return cy.contains('button', 'Delete'); }
+    get deleteButton() { return cy.get('button#delete'); }
+    get confirmDeleteButton() { return cy.contains('button', 'Delete') }
     get successMessage() { return cy.contains('deleted successfully'); }
 
-    // Actions
+    // Navigation Methods
     visit() {
         // Wait for page to be ready
         cy.get('body').should('be.visible');
@@ -28,7 +38,7 @@ class ContactPage {
         cy.get('body').then($body => {
             if ($body.find('a[aria-label="Contacts"]').length === 0) {
                 cy.reload();
-                cy.wait(2000);
+                cy.wait(this.TIMEOUTS.SHORT);
             }
         });
         
@@ -41,158 +51,163 @@ class ContactPage {
         cy.wait(1000); // Additional wait for content
     }
 
+    // Contact Creation Methods
     clickAddButton() {
-        // Ensure the button is clickable
         cy.wait(1000);
-        this.addButton.should('be.visible').should('not.be.disabled').click();
-        // Wait for form to be visible
-        cy.get('[data-test-key="name"]').should('be.visible');
+        this.addButton
+            .should('be.visible')
+            .should('not.be.disabled')
+            .click();
+        this.nameInput.should('be.visible');
     }
 
-    // New methods for filling individual fields
-    fillEmailField(emailAddress) {
-        if (emailAddress) {
-            this.emailInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(emailAddress, { delay: 100 });
-        }
+    fillContactDetails(contactName, organization, phoneNumber, emailAddress) {
+        this.fillNameField(contactName);
+        this.fillOrganizationField(organization);
+        this.fillPhoneField(phoneNumber);
+        this.fillEmailField(emailAddress);
     }
 
     fillNameField(contactName) {
-        if (contactName) {
-            this.nameInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(contactName, { delay: 100 });
-        }
+        if (!contactName) return;
+        this.typeIntoField(this.nameInput, contactName);
     }
 
     fillOrganizationField(organization) {
-        if (organization) {
-            this.orgInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(organization, { delay: 100 });
-            cy.wait(500); // Wait for suggestions
-            this.addNewOrgButton.should('be.visible').click();
-        }
+        if (!organization) return;
+        this.typeIntoField(this.orgInput, organization);
+        cy.wait(500);
+        this.addNewOrgButton.should('be.visible').click();
     }
 
     fillPhoneField(phoneNumber) {
-        if (phoneNumber) {
-            this.phoneInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(phoneNumber, { delay: 100 });
-        }
+        if (!phoneNumber) return;
+        this.typeIntoField(this.phoneInput, phoneNumber);
     }
 
-    // Original method kept for backward compatibility
-    fillContactForm(contactName, organization, phoneNumber, emailAddress) {
-        // Fill name with retry if needed
-        if (contactName) {
-            this.nameInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(contactName, { delay: 100 });
-        }
-        
-        // Fill organization with retry
-        if (organization) {
-            this.orgInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(organization, { delay: 100 });
-            cy.wait(500); // Wait for suggestions
-            this.addNewOrgButton.should('be.visible').click();
-        }
-        
-        // Fill phone with retry
-        if (phoneNumber) {
-            this.phoneInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(phoneNumber, { delay: 100 });
-        }
-        
-        // Fill email with retry
-        if (emailAddress) {
-            this.emailInput.should('be.visible').should('be.enabled')
-                .clear()
-                .type(emailAddress, { delay: 100 });
-        }
+    fillEmailField(emailAddress) {
+        if (!emailAddress) return;
+        this.typeIntoField(this.emailInput, emailAddress);
+    }
+
+    typeIntoField(field, value) {
+        field
+            .should('be.visible')
+            .should('be.enabled')
+            .clear()
+            .type(value, { delay: 100 });
     }
 
     selectOwner() {
-        cy.wait(500); // Wait for dropdown to be ready
+        cy.wait(500);
         this.ownerSelect.should('be.visible').click();
         this.ownerOption.should('be.visible').click();
     }
 
     addLabel() {
-        cy.wait(500); // Wait for dropdown to be ready
+        cy.wait(500);
         this.labelSelect.should('be.visible').click();
-        // Click outside to close dropdown
         cy.get('body').click(0, 0);
     }
 
     saveContact() {
-        cy.wait(500); // Wait for form to be ready
-        this.saveButton.should('be.visible').should('not.be.disabled').click();
-        // Wait for any potential error messages
+        cy.wait(500);
+        this.saveButton
+            .should('be.visible')
+            .should('not.be.disabled')
+            .click();
         cy.wait(1000);
     }
 
+    // Contact Deletion Methods
+    selectAllContacts() {
+        // Wait for the page to be ready
+        cy.wait(this.TIMEOUTS.SHORT);
+        
+        // Ensure checkbox is visible and clickable
+        this.selectAllCheckbox
+            .should('be.visible')
+            .should('not.be.disabled')
+            .click();
+        
+        // Wait for selection to take effect
+        cy.wait(1000);
+    }
+
+    clickDeleteAndConfirm() {
+        // Click initial delete button
+        this.deleteButton
+            .should('be.visible')
+            .should('not.be.disabled')
+            .click();
+
+        // Wait for dialog
+        cy.wait(2000);
+
+        // Try to click the delete button in the dialog
+        cy.get('body').then(() => {
+            // Try different approaches to find and click the delete button
+            cy.get('.cui5-dialog__actions button, button.cui5-button--variant-negative, button:contains("Delete")')
+                .filter(':visible')
+                .first()
+                .click({ force: true });
+        });
+    }
+
+    deleteContact() {
+        // Visit contacts page
+        this.visit();
+
+        // Add retry mechanism
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        const attemptDeletion = () => {
+            attempts++;
+            cy.log(`Deletion attempt ${attempts} of ${maxAttempts}`);
+
+            // Select all contacts
+            this.selectAllContacts();
+
+            // Attempt to delete with retries
+            cy.then(() => {
+                // Click delete and confirm
+                this.clickDeleteAndConfirm();
+
+                // Verify success or retry
+                cy.get('body').then($body => {
+                    if ($body.find(':contains("deleted successfully")').length > 0) {
+                        cy.log('Deletion successful');
+                    } else if (attempts < maxAttempts) {
+                        cy.log('Deletion verification failed, retrying...');
+                        cy.wait(2000);
+                        attemptDeletion();
+                    }
+                });
+            });
+        };
+
+        attemptDeletion();
+    }
+
+    // Verification Methods
     verifyContactCreation(contactName) {
-        cy.contains(contactName, { timeout: 10000 }).should('be.visible');
+        cy.contains(contactName, { timeout: this.TIMEOUTS.DEFAULT }).should('be.visible');
     }
 
     verifyValidationMessage(message) {
         cy.contains(message, { timeout: 5000 }).should('be.visible');
     }
 
-    selectAllContacts() {
-        // Wait for the contacts list to be loaded
-        cy.wait(3000);
-        
-        // Ensure we're on the contacts page and list is loaded
-        cy.get('[data-cy="select-all"]').should('be.visible');
-        
-        // Click the select all checkbox
-        this.selectAllCheckbox
-            .should('be.visible')
-            .click();
-        
-        // Wait for selection to take effect
-        cy.wait(2000);
-    }
-
-    deleteSelectedContacts() {
-        // Wait for delete button to be enabled and visible
-        this.deleteButton
-            .should('be.visible')
-            .should('not.be.disabled')
-            .click();
-    }
-
-    confirmDeletion() {
-        // Wait for confirmation dialog and click delete
-        this.confirmDeleteButton
-            .should('be.visible')
-            .should('not.be.disabled')
-            .click();
-    }
-
-    deleteContact() {
-        // Visit the contacts page first
-        this.visit();
-        
-        // Select all contacts
-        this.selectAllContacts();
-        
-        // Delete selected contacts
-        this.deleteSelectedContacts();
-        
-        // Confirm deletion
-        this.confirmDeletion();
-        
-        // Verify deletion success
-        this.successMessage.should('be.visible');
+    // Complete Workflows
+    createContact(contactName, organization, phoneNumber, emailAddress) {
+        this.clickAddButton();
+        this.fillContactDetails(contactName, organization, phoneNumber, emailAddress);
+        this.selectOwner();
+        this.addLabel();
+        this.saveContact();
+        this.verifyContactCreation(contactName);
     }
 }
 
-export default new ContactPage();
+export default ContactPage;

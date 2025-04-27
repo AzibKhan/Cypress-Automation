@@ -1,131 +1,153 @@
-# Pipedrive Cypress Automation
+# Pipedrive Cypress Automation Framework
 
-This repository contains Cypress automation tests for the Pipedrive application.
-
-## Project Structure
-
-```
-cypress/
-├── e2e/
-│   └── Pipedrive/
-│       └── Web/
-│           ├── pages/           # Page Objects
-│           │   ├── LoginPage.js
-│           │   └── ContactPage.js
-│           └── tests/           # Test Files
-│               ├── 01_login_test.cy.js
-│               └── 02_contact_test.cy.js
-├── fixtures/
-│   ├── contactData.json       # Test Data for Contacts
-│   └── example.json          # Example Fixture Template
-├── reports/
-│   └── mochawesome/         # Test Reports Directory
-├── screenshots/             # Failure Screenshots
-├── videos/                  # Test Execution Recordings
-└── support/
-    └── e2e.js              # Support File
-```
-
-## Naming Conventions
-
-- **Test Files**: Numbered prefix for execution order (e.g., `01_login_test.cy.js`)
-- **Page Objects**: PascalCase (e.g., `LoginPage.js`, `ContactPage.js`)
-- **Fixture Files**: camelCase (e.g., `contactData.json`)
-- **Test Cases**: Descriptive names using camelCase
-- **Selectors**: Meaningful names that describe the element's purpose
+This project contains automated tests for the Pipedrive application using Cypress.
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
-- Chrome, Firefox, or Edge browser
-- Jenkins (for CI/CD) or GitHub (for GitHub Actions)
+- Node.js (v18 or higher)
+- npm (comes with Node.js)
+- A Pipedrive account with valid credentials
+- Git
 
-## Setup
+## Detailed Project Structure
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd pipedrive-cypress-automation
-   ```
+```
+├── cypress/
+│   ├── e2e/                    # Test files
+│   │   └── Pipedrive/
+│   │       └── Web/           # Web application tests
+│   │           ├── pages/     # Page Object Models
+│   │           │   ├── contactPage.js
+│   │           │   └── loginPage.js
+│   │           └── tests/     # Test Specifications
+│   │               └── contact.cy.js
+│   ├── fixtures/              # Test data
+│   │   └── contactData.json
+│   ├── support/               # Support files and custom commands
+│   │   ├── commands.js       # Custom Cypress commands
+│   │   └── e2e.js           # Support file for e2e tests
+│   ├── reports/              # Test reports
+│   │   └── mochawesome/     # Mochawesome reports
+│   ├── screenshots/         # Test failure screenshots
+│   └── videos/             # Test execution recordings
+├── .github/
+│   └── workflows/          # GitHub Actions workflows
+│       └── cypress-tests.yml
+├── node_modules/          # Project dependencies
+├── cypress.config.js      # Cypress configuration
+├── package.json          # Project metadata and scripts
+├── package-lock.json     # Dependency lock file
+└── README.md            # Project documentation
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+## Detailed Setup Instructions
 
-3. Configure environment variables:
-   Create a `.env` file in the root directory with the following variables:
-   ```
-   CYPRESS_BASE_URL=https://app.pipedrive.com
-   CYPRESS_EMAIL=your-email@example.com
-   CYPRESS_PASSWORD=your-password
-   ```
+1. **Clone the Repository**:
+```bash
+git clone <repository-url>
+cd Cypress-Automation
+```
+
+2. **Install Dependencies**:
+```bash
+# Install all dependencies
+npm ci
+
+# Verify Cypress installation
+npx cypress verify
+```
+
+3. **Environment Setup**:
+Create a `cypress.env.json` file in the root directory:
+```json
+{
+    "email": "your-pipedrive-email",
+    "password": "your-pipedrive-password",
+    "BASE_URL": "https://app.pipedrive.com"
+}
+```
+
+4. **Verify Installation**:
+```bash
+# Open Cypress Test Runner
+npx cypress open
+
+# Run a test in headless mode
+npx cypress run
+```
+
+## GitHub Actions Setup
+
+### Required Secrets
+Add these secrets to your GitHub repository:
+- `CYPRESS_BASE_URL`: Pipedrive application URL
+- `CYPRESS_EMAIL`: Pipedrive login email
+- `CYPRESS_PASSWORD`: Pipedrive login password
+
+### Workflow Configuration
+The workflow (`cypress-tests.yml`) includes:
+- Node.js v18 setup
+- Dependency installation
+- Test execution
+- Report generation
+- Artifact upload
+
+### Dependencies
+Key dependencies in `package.json`:
+```json
+{
+  "dependencies": {
+    "cypress": "^14.3.2",
+    "cypress-mochawesome-reporter": "^3.0.0"
+  },
+  "devDependencies": {
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^4.3.0",
+    "mochawesome-report-generator": "^6.2.0"
+  }
+}
+```
 
 ## Running Tests
 
-### Test Execution Options
+### Local Development
+```bash
+# Run all tests in Chrome
+npm run test:chrome
 
-1. **Run All Tests in Order**:
-   ```bash
-   npm run test:all-ordered
-   ```
-   This will run login tests first, followed by other tests.
+# Run specific test file
+npx cypress run --spec "cypress/e2e/Pipedrive/Web/contact.cy.js"
 
-2. **Run Login Tests Only**:
-   ```bash
-   npm run test:login
-   ```
+# Open Cypress Test Runner
+npx cypress open
+```
 
-3. **Run in Different Browsers**:
-   ```bash
-   npm run test:chrome     # Run in Chrome (headless)
-   npm run test:firefox    # Run in Firefox (headless)
-   npm run test:electron   # Run in Electron (headless)
-   ```
-
-4. **Open Cypress Test Runner**:
-   ```bash
-  npm run cypress:open
-  ```
-
-### Additional Scripts
-
-- **Generate Test Reports**:
-  ```bash
-  npm run generate:all-reports
-  ```
-
-- **Clean Reports and Screenshots**:
-  ```bash
-  npm run clean:reports
-  ```
+### CI/CD Pipeline
+Tests run automatically on:
+- Push to main/master branches
+- Pull requests to main/master branches
+- Manual workflow dispatch
 
 ## Test Reports
 
-After running the tests, reports can be found in:
-- `cypress/reports/mochawesome/` - HTML reports
-- `cypress/videos/` - Test execution videos
-- `cypress/screenshots/` - Failure screenshots
+### Report Generation
+```bash
+# Generate reports
+npm run generate:report
 
-## CI/CD Integration
+# Merge multiple reports
+npm run merge:reports
+```
 
-### GitHub Actions
-Workflow defined in `.github/workflows/cypress-tests.yml`
-
-Required secrets:
-- `CYPRESS_BASE_URL`
-- `CYPRESS_EMAIL`
-- `CYPRESS_PASSWORD`
-
-### Jenkins Pipeline
-Pipeline configuration in `Jenkinsfile`
+### Report Location
+- HTML reports: `cypress/reports/mochawesome/`
+- Screenshots: `cypress/screenshots/`
+- Videos: `cypress/videos/`
 
 ## Best Practices
 
 1. **Test Organization**:
    - Tests are organized by feature
-   - Numbered prefixes ensure correct execution order
    - Page Object Model pattern for better maintenance
    - Each test file focuses on a specific feature
 
@@ -133,56 +155,80 @@ Pipeline configuration in `Jenkinsfile`
    - Test data stored in fixture files
    - Sensitive data managed through environment variables
    - No hardcoded credentials in tests
-   - Fixtures follow camelCase naming convention
 
 3. **Error Handling**:
    - Proper error messages and assertions
    - Screenshots on failure
    - Video recordings of test runs
-   - Detailed error reporting in Mochawesome reports
-
-4. **Code Quality**:
-   - Consistent naming conventions
-   - Proper code formatting
-   - Modular and reusable code
-   - Clear and meaningful comments
-
-## Maintenance
-
-1. **Regular Updates**:
-   - Keep dependencies up to date
-   - Review and update test cases
-   - Maintain documentation
-   - Clean old reports and screenshots
-
-2. **Version Control**:
-   - Follow Git best practices
-   - Meaningful commit messages
-   - Regular backups
-   - Branch management
+   - Detailed error reporting
 
 ## Troubleshooting
 
-- If tests fail in CI but pass locally:
-  - Check environment variables
-  - Verify browser versions
-  - Check network connectivity
-  - Review test recordings and screenshots
-  - Check Mochawesome reports for detailed error logs
+### Common Issues
+1. **Login Failures**:
+   - Verify environment variables
+   - Check network connectivity
+   - Ensure correct credentials
 
-## Contributing
+2. **Test Failures**:
+   - Check test reports
+   - Review screenshots
+   - Verify selectors
+   - Check application state
 
-1. Follow the established naming conventions
-2. Use the Page Object Model pattern
-3. Add appropriate test data to fixtures
-4. Update documentation as needed
-5. Run tests locally before pushing
-6. Follow the Git workflow
+3. **CI/CD Issues**:
+   - Verify GitHub secrets
+   - Check workflow logs
+   - Ensure proper permissions
+
+### Debug Tools
+- Cypress Debug Logs: `DEBUG=cypress:*`
+- Network Logs: Chrome DevTools
+- Test Reports: Mochawesome
+- Screenshots: `cypress/screenshots`
+
+## Maintenance
+
+### Regular Tasks
+1. Update dependencies:
+```bash
+npm update
+```
+
+2. Clean reports:
+```bash
+rm -rf cypress/reports/*
+rm -rf cypress/screenshots/*
+rm -rf cypress/videos/*
+```
+
+3. Verify tests:
+```bash
+npx cypress verify
+```
+
+### Version Control
+- Follow Git flow branching model
+- Use meaningful commit messages
+- Keep feature branches updated
+- Regular merges to main branch
 
 ## Support
 
-For any issues or questions:
-1. Check the troubleshooting guide
-2. Review test reports and logs
-3. Check CI/CD pipeline logs
-4. Raise an issue in the repository 
+For issues or questions:
+1. Check troubleshooting guide
+2. Review test reports
+3. Check CI/CD logs
+4. Create GitHub issue
+
+## Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes
+4. Run tests
+5. Submit pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 

@@ -1,8 +1,9 @@
 import LoginPage from '../pages/LoginPage';
-import contactPage from '../pages/contactPage';
+import ContactPage from '../pages/contactPage';
 
 describe('Pipedrive Contact Management', () => {
     let testData;
+    const contactPage = new ContactPage();
     
     beforeEach(() => {
         // Handle uncaught exceptions
@@ -39,7 +40,7 @@ describe('Pipedrive Contact Management', () => {
             contactPage.clickAddButton();
             
             // Use POM to fill the contact form
-            contactPage.fillContactForm(testData.contactName, testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.fillContactDetails(testData.contactName, testData.organization, testData.phoneNumber, testData.emailaddress);
             
             // Use POM to select owner
             contactPage.selectOwner();
@@ -64,7 +65,7 @@ describe('Pipedrive Contact Management', () => {
             contactPage.clickAddButton();
             
             // Fill form without name
-            contactPage.fillContactForm('', testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.fillContactDetails('', testData.organization, testData.phoneNumber, testData.emailaddress);
             
             // Submit the form
             contactPage.saveContact();

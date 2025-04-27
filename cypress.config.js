@@ -1,17 +1,4 @@
 const { defineConfig } = require("cypress");
-const fs = require('fs-extra');
-const path = require('path');
-
-function getConfigurationByFile(file) {
-  const pathToConfigFile = path.join('cypress', 'config', `${file}.json`);
-
-  if(!fs.existsSync(pathToConfigFile)) {
-    console.log("No custom config file found.");
-    return {};
-  }
-
-  return fs.readJson(pathToConfigFile);
-}
 
 module.exports = defineConfig({
   projectId: 'mevvq9',
@@ -31,21 +18,9 @@ module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       require('cypress-mochawesome-reporter/plugin')(on);
-      
-      const file = config.env.configFile || '';
-      const fileConfig = getConfigurationByFile(file);
-      
-      // Handle uncaught exceptions properly
-      on('task', {
-        log(message) {
-          console.log(message);
-          return null;
-        }
-      });
-
-      return { ...config, ...fileConfig };
+      return config;
     },
-    specPattern: "cypress/e2e/**/*.{cy.js,cy.ts}",
+    specPattern: "cypress/e2e/**/*.cy.js",
     baseUrl: process.env.CYPRESS_BASE_URL || 'https://app.pipedrive.com',
     chromeWebSecurity: false,
     defaultCommandTimeout: 10000,
@@ -58,12 +33,6 @@ module.exports = defineConfig({
     retries: {
       runMode: 2,
       openMode: 0
-    },
-    env: {
-      webdriveruni_homepage: "https://app.pipedrive.com/",
-      email: "azib.pipedrive@gmail.com",
-      password: "pipedrive1234",
-    },
-
+    }
   },
 });
