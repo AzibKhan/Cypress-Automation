@@ -34,6 +34,8 @@ jobs:
         run: |
           mkdir -p cypress/reports/mochawesome
           mkdir -p cypress/reports/mochawesome/.jsons
+          mkdir -p cypress/screenshots
+          mkdir -p cypress/videos
 
       - name: Run Cypress tests
         run: npm run test:chrome
@@ -46,25 +48,43 @@ jobs:
       - name: Generate Mochawesome report
         if: always()
         run: |
-          npm run merge:reports
-          npm run generate:report
+          npm run merge:reports || echo "Failed to merge reports"
+          npm run generate:report || echo "Failed to generate report"
 
       - name: List workspace contents (post-test)
         if: always()
         run: |
+          echo "Current directory:"
           pwd
-          ls -la cypress || echo "No cypress directory"
-          ls -la cypress/screenshots || echo "No screenshots directory"
-          ls -la cypress/videos || echo "No videos directory"
+          echo "Cypress directory structure:"
+          find cypress -type d
+          echo "Files in cypress/reports/mochawesome:"
           ls -la cypress/reports/mochawesome || echo "No mochawesome directory"
+          echo "Files in cypress/screenshots:"
+          ls -la cypress/screenshots || echo "No screenshots"
+          echo "Files in cypress/videos:"
+          ls -la cypress/videos || echo "No videos"
 
-      - name: Upload test results
+      - name: Upload reports
         if: always()
         uses: actions/upload-artifact@v2
         with:
-          name: test-results
-          path: |
-            cypress/reports/mochawesome
-            cypress/screenshots
-            cypress/videos
+          name: mochawesome-report
+          path: cypress/reports/mochawesome
+          if-no-files-found: warn
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: screenshots
+          path: cypress/screenshots
+          if-no-files-found: warn
+
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: videos
+          path: cypress/videos
           if-no-files-found: warn 
