@@ -1,4 +1,4 @@
-FROM cypress/included:13.6.1
+FROM cypress/included:14.3.2
 
 # Set working directory
 WORKDIR /e2e
@@ -14,6 +14,8 @@ COPY . .
 
 # Set environment variables
 ENV CYPRESS_BASE_URL=https://app.pipedrive.com
+ENV CYPRESS_EMAIL=${CYPRESS_EMAIL}
+ENV CYPRESS_PASSWORD=${CYPRESS_PASSWORD}
 
 # Command to run Cypress tests
 CMD ["npx", "cypress", "run"] 

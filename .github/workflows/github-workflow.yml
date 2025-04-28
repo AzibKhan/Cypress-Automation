@@ -26,6 +26,7 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+          fail-on-cache-miss: false
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
@@ -36,11 +37,14 @@ jobs:
           tags: cypress-tests:latest
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
+          build-args: |
+            CYPRESS_VERSION=14.3.2
 
       - name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          sudo rm -rf /tmp/.buildx-cache
+          sudo mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+          sudo chmod -R 777 /tmp/.buildx-cache
 
       - name: Create reports directory
         run: |
@@ -54,11 +58,13 @@ jobs:
         env:
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          CYPRESS_BASE_URL: https://app.pipedrive.com
         run: |
           docker run --rm \
             -v ${{ github.workspace }}/cypress:/e2e/cypress \
             -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} \
             -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
+            -e CYPRESS_BASE_URL=https://app.pipedrive.com \
             cypress-tests:latest
 
       - name: Generate Mochawesome report
@@ -67,6 +73,7 @@ jobs:
           echo "Current directory structure:"
           find cypress -type d
           echo -e "\nGenerating reports..."
+          npm ci
           npm run merge:reports || echo "Failed to merge reports"
           npm run generate:report || echo "Failed to generate report"
           echo -e "\nReport directory contents:"
