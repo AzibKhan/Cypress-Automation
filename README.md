@@ -8,6 +8,7 @@ This project contains automated tests for the Pipedrive application using Cypres
 - npm (comes with Node.js)
 - A Pipedrive account with valid credentials
 - Git
+- Docker (for Docker-based testing)
 
 ## Detailed Project Structure
 
@@ -17,24 +18,27 @@ This project contains automated tests for the Pipedrive application using Cypres
 │   │   └── Pipedrive/
 │   │       └── Web/           # Web application tests
 │   │           ├── pages/     # Page Object Models
-│   │           │   ├── contactPage.js
-│   │           │   └── loginPage.js
+│   │           │   ├── ContactPage.js
+│   │           │   └── LoginPage.js
 │   │           └── tests/     # Test Specifications
-│   │               └── contact.cy.js
+│   │               ├── 01_login_test.cy.js
+│   │               └── 02_contact_test.cy.js
 │   ├── fixtures/              # Test data
-│   │   └── contactData.json
 │   ├── support/               # Support files and custom commands
-│   │   ├── commands.js       # Custom Cypress commands
-│   │   └── e2e.js           # Support file for e2e tests
 │   ├── reports/              # Test reports
 │   │   └── mochawesome/     # Mochawesome reports
 │   ├── screenshots/         # Test failure screenshots
 │   └── videos/             # Test execution recordings
 ├── .github/
 │   └── workflows/          # GitHub Actions workflows
-│       └── cypress-tests.yml
+│       └── consolidated-workflow.yml  # Consolidated workflow for Docker-based testing
 ├── node_modules/          # Project dependencies
 ├── cypress.config.js      # Cypress configuration
+├── cypress.env.json       # Cypress environment variables
+├── Dockerfile            # Docker configuration
+├── docker-compose.yml    # Docker Compose configuration
+├── .dockerignore         # Docker ignore file
+├── run-cypress-docker.sh # Docker helper script
 ├── package.json          # Project metadata and scripts
 ├── package-lock.json     # Dependency lock file
 └── README.md            # Project documentation
@@ -84,13 +88,19 @@ npx cypress run
 
 ### Running Tests with Docker
 
-1. **Build and Run Tests**:
+1. **Using the Helper Script**:
 ```bash
 # Run all tests in headless mode
 ./run-cypress-docker.sh
 
 # Open Cypress UI in Docker
 ./run-cypress-docker.sh --open
+
+# Run tests matching a specific pattern
+./run-cypress-docker.sh --spec login
+
+# Show help
+./run-cypress-docker.sh --help
 ```
 
 2. **Using Docker Compose Directly**:
@@ -105,13 +115,39 @@ docker-compose run --rm cypress
 docker-compose run --rm cypress npx cypress run --spec "cypress/e2e/Pipedrive/Web/tests/01_login_test.cy.js"
 ```
 
-3. **Viewing Test Results**:
+3. **Using npm Scripts**:
+```bash
+# Build Docker image
+npm run docker:build
+
+# Run tests in Docker
+npm run docker:run
+
+# Open Cypress UI in Docker
+npm run docker:open
+
+# Run tests using the helper script
+npm run docker:test
+
+# Run login tests only
+npm run docker:test:login
+```
+
+4. **Viewing Test Results**:
 Test results, screenshots, and videos will be available in your local project directory as they are mounted as volumes.
 
 ### Docker Configuration
 - `Dockerfile`: Defines the Cypress environment
 - `docker-compose.yml`: Configures the service and volumes
 - `.dockerignore`: Excludes unnecessary files from the build
+- `run-cypress-docker.sh`: Helper script for running tests with Docker
+
+### Docker CI/CD Integration
+The project includes a GitHub Actions workflow (`consolidated-workflow.yml`) that uses Docker to run tests in CI/CD:
+- Builds the Docker image with caching
+- Runs the tests
+- Generates and uploads test reports and artifacts
+- Includes a quick test job for manual verification
 
 ## GitHub Actions Setup
 
@@ -122,22 +158,22 @@ Add these secrets to your GitHub repository:
 - `CYPRESS_PASSWORD`: Pipedrive login password
 
 ### Workflow Configuration
-The workflow (`cypress-tests.yml`) includes:
-- Node.js v18 setup
-- Dependency installation
-- Test execution
+The consolidated workflow (`consolidated-workflow.yml`) includes:
+- Docker Buildx setup with caching
+- Docker image building
+- Test execution in Docker
 - Report generation
 - Artifact upload
+- Quick test job for manual verification
 
 ### Dependencies
 Key dependencies in `package.json`:
 ```json
 {
-  "dependencies": {
-    "cypress": "^14.3.2",
-    "cypress-mochawesome-reporter": "^3.0.0"
-  },
   "devDependencies": {
+    "cypress": "^v14.3.2",
+    "cypress-mochawesome-reporter": "^3.5.1",
+    "cypress-xpath": "^2.0.1",
     "mochawesome": "^7.1.3",
     "mochawesome-merge": "^4.3.0",
     "mochawesome-report-generator": "^6.2.0"
@@ -153,7 +189,7 @@ Key dependencies in `package.json`:
 npm run test:chrome
 
 # Run specific test file
-npx cypress run --spec "cypress/e2e/Pipedrive/Web/contact.cy.js"
+npx cypress run --spec "cypress/e2e/Pipedrive/Web/tests/01_login_test.cy.js"
 
 # Open Cypress Test Runner
 npx cypress open
@@ -161,8 +197,8 @@ npx cypress open
 
 ### CI/CD Pipeline
 Tests run automatically on:
-- Push to main/master branches
-- Pull requests to main/master branches
+- Push to main/master/test branches
+- Pull requests to main/master/test branches
 - Manual workflow dispatch
 
 ## Test Reports
@@ -174,6 +210,9 @@ npm run generate:report
 
 # Merge multiple reports
 npm run merge:reports
+
+# Generate all reports
+npm run generate:all-reports
 ```
 
 ### Report Location
@@ -234,9 +273,7 @@ npm update
 
 2. Clean reports:
 ```bash
-rm -rf cypress/reports/*
-rm -rf cypress/screenshots/*
-rm -rf cypress/videos/*
+npm run clean:reports
 ```
 
 3. Verify tests:
