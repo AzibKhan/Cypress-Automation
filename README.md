@@ -94,6 +94,9 @@ npx cypress run
 
 1. **Using the Helper Script**:
 ```bash
+# Make the script executable
+chmod +x run-cypress-docker.sh
+
 # Run all tests in headless mode
 ./run-cypress-docker.sh
 
@@ -121,20 +124,14 @@ docker-compose run --rm cypress npx cypress run --spec "cypress/e2e/Pipedrive/We
 
 3. **Using npm Scripts**:
 ```bash
-# Build Docker image
-npm run docker:build
+# Run all tests in Chrome
+npm run test:chrome
 
-# Run tests in Docker
-npm run docker:run
+# Run specific test file
+npm run test:login
 
-# Open Cypress UI in Docker
-npm run docker:open
-
-# Run tests using the helper script
-npm run docker:test
-
-# Run login tests only
-npm run docker:test:login
+# Run tests in all browsers
+npm run test:all-browsers
 ```
 
 4. **Viewing Test Results**:
@@ -146,22 +143,18 @@ Test results, screenshots, and videos will be available in your local project di
 - `.dockerignore`: Excludes unnecessary files from the build
 - `run-cypress-docker.sh`: Helper script for running tests with Docker
 
-### Docker CI/CD Integration
-The project includes a GitHub Actions workflow (`github-workflow.yml`) that uses Docker to run tests in CI/CD:
-- Builds the Docker image with caching
-- Runs the tests
-- Generates and uploads test reports and artifacts
-- Includes a quick test job for manual verification
+## CI/CD Integration
 
-## GitHub Actions Setup
+### GitHub Actions
+The project uses GitHub Actions for CI/CD with Docker support. See `.github/workflows/github-workflow.yml` for configuration details.
 
-### Required Secrets
+#### Required Secrets
 Add these secrets to your GitHub repository:
 - `CYPRESS_BASE_URL`: Pipedrive application URL
 - `CYPRESS_EMAIL`: Pipedrive login email
 - `CYPRESS_PASSWORD`: Pipedrive login password
 
-### Workflow Configuration
+#### Workflow Configuration
 The GitHub workflow (`github-workflow.yml`) includes:
 - Docker Buildx setup with caching
 - Docker image building
@@ -170,20 +163,42 @@ The GitHub workflow (`github-workflow.yml`) includes:
 - Artifact upload
 - Quick test job for manual verification
 
-### Dependencies
-Key dependencies in `package.json`:
-```json
-{
-  "devDependencies": {
-    "cypress": "^v14.3.2",
-    "cypress-mochawesome-reporter": "^3.5.1",
-    "cypress-xpath": "^2.0.1",
-    "mochawesome": "^7.1.3",
-    "mochawesome-merge": "^4.3.0",
-    "mochawesome-report-generator": "^6.2.0"
-  }
-}
-```
+### Jenkins Pipeline
+The project includes Jenkins pipeline configuration (`Jenkinsfile`) with the following features:
+- Docker-based test execution
+- Automated test execution
+- Report generation
+- Artifact archiving
+- Failure notifications
+
+#### Jenkins Setup
+1. **Prerequisites**:
+   - Jenkins server with Docker plugin installed
+   - Docker installed on Jenkins agent
+   - Node.js installed on Jenkins agent
+
+2. **Configuration**:
+   - Create a new Pipeline job
+   - Point to the repository containing this project
+   - Set the pipeline script to use the Jenkinsfile
+   - Configure environment variables:
+     - `CYPRESS_EMAIL`: Pipedrive login email
+     - `CYPRESS_PASSWORD`: Pipedrive login password
+     - `CYPRESS_BASE_URL`: Pipedrive application URL
+
+3. **Pipeline Stages**:
+   - Checkout: Get the code from the repository
+   - Build Docker Image: Build the Docker image for testing
+   - Create Reports Directory: Set up directories for reports
+   - Run Cypress Tests: Execute tests in Docker
+   - Generate Reports: Create test reports
+   - Post Actions: Archive artifacts and handle success/failure
+
+### Test Execution Scripts
+The project includes several helper scripts:
+- `run-cypress-docker.sh`: Docker-based test execution
+- `run-tests.sh`: Local test execution helper
+- `test-workflow.sh`: CI/CD workflow helper
 
 ## Running Tests
 
@@ -204,6 +219,7 @@ Tests run automatically on:
 - Push to main/master/test branches
 - Pull requests to main/master/test branches
 - Manual workflow dispatch
+- Jenkins pipeline execution
 
 ## Test Reports
 
@@ -260,6 +276,7 @@ npm run generate:all-reports
    - Verify GitHub secrets
    - Check workflow logs
    - Ensure proper permissions
+   - Check Jenkins configuration
 
 ### Debug Tools
 - Cypress Debug Logs: `DEBUG=cypress:*`
@@ -309,61 +326,4 @@ For issues or questions:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## CI/CD Integration
-
-### GitHub Actions
-The project uses GitHub Actions for CI/CD with Docker support. See `.github/workflows/github-workflow.yml` for configuration details.
-
-### Jenkins Pipeline
-The project includes Jenkins pipeline configuration (`Jenkinsfile`) with the following features:
-- Automated test execution
-- Report generation
-- Artifact archiving
-- Failure notifications
-
-### Test Execution Scripts
-The project includes several helper scripts:
-- `run-cypress-docker.sh`: Docker-based test execution
-- `run-tests.sh`: Local test execution helper
-- `test-workflow.sh`: CI/CD workflow helper
-
-### Reporter Configuration
-The project uses Mochawesome reporter with custom configuration (`reporter-config.json`):
-- HTML report generation
-- JSON report generation
-- Screenshot embedding
-- Video recording
-
-## GitHub Actions Setup
-
-### Required Secrets
-Add these secrets to your GitHub repository:
-- `CYPRESS_BASE_URL`: Pipedrive application URL
-- `CYPRESS_EMAIL`: Pipedrive login email
-- `CYPRESS_PASSWORD`: Pipedrive login password
-
-### Workflow Configuration
-The GitHub workflow (`github-workflow.yml`) includes:
-- Docker Buildx setup with caching
-- Docker image building
-- Test execution in Docker
-- Report generation
-- Artifact upload
-- Quick test job for manual verification
-
-### Dependencies
-Key dependencies in `package.json`:
-```json
-{
-  "devDependencies": {
-    "cypress": "^v14.3.2",
-    "cypress-mochawesome-reporter": "^3.5.1",
-    "cypress-xpath": "^2.0.1",
-    "mochawesome": "^7.1.3",
-    "mochawesome-merge": "^4.3.0",
-    "mochawesome-report-generator": "^6.2.0"
-  }
-}
-``` 
+This project is licensed under the MIT License - see the LICENSE file for details. 
