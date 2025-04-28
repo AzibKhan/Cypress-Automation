@@ -115,7 +115,7 @@ describe('Pipedrive Contact Management', () => {
         });
     });
     
-    it.only('Should delete the contact created', () => {
+    it('Should delete the contact created', () => {
         cy.wrap(null).then(() => {
             // Use the Page Object Model to delete the contact
             contactPage.deleteContact();

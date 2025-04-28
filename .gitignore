@@ -29,3 +29,7 @@ Thumbs.db
 
 # Jenkins
 .jenkins/
+
+# System files
+*/.DS_Store
+**/.DS_Store
