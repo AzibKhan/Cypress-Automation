@@ -73,7 +73,6 @@ jobs:
           echo "Current directory structure:"
           find cypress -type d
           echo -e "\nGenerating reports..."
-          npm ci
           npm run merge:reports || echo "Failed to merge reports"
           npm run generate:report || echo "Failed to generate report"
           echo -e "\nReport directory contents:"

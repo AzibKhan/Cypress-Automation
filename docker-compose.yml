@@ -11,4 +11,6 @@ services:
       - ./cypress.env.json:/e2e/cypress.env.json
     environment:
       - CYPRESS_BASE_URL=https://app.pipedrive.com
+      - CYPRESS_EMAIL=${CYPRESS_EMAIL}
+      - CYPRESS_PASSWORD=${CYPRESS_PASSWORD}
     command: npx cypress run 
