@@ -9,7 +9,7 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Create necessary directories
+# Create necessary directories with proper permissions
 RUN mkdir -p cypress/reports/mochawesome \
     && mkdir -p cypress/reports/mochawesome/.jsons \
     && mkdir -p cypress/screenshots \
@@ -23,6 +23,9 @@ COPY . .
 ENV CYPRESS_BASE_URL=https://app.pipedrive.com
 ENV CYPRESS_EMAIL=${CYPRESS_EMAIL}
 ENV CYPRESS_PASSWORD=${CYPRESS_PASSWORD}
+ENV CYPRESS_VIDEO=true
+ENV CYPRESS_SCREENSHOTS=true
+ENV CYPRESS_REPORTS=true
 
-# Command to run Cypress tests
-CMD ["npx", "cypress", "run"] 
+# Command to run Cypress tests with explicit configuration
+CMD ["npx", "cypress", "run", "--config", "video=true,screenshotOnRunFailure=true,trashAssetsBeforeRuns=false"] 
