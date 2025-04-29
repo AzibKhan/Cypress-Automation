@@ -13,7 +13,9 @@ module.exports = defineConfig({
     json: true,
     embeddedScreenshots: true,
     inlineAssets: true,
-    saveAllAttempts: false
+    saveAllAttempts: false,
+    toConsole: true,
+    quiet: false
   },
   e2e: {
     setupNodeEvents(on, config) {
