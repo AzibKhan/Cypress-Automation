@@ -20,19 +20,21 @@ module.exports = defineConfig({
       require('cypress-mochawesome-reporter/plugin')(on);
       return config;
     },
-    specPattern: "cypress/e2e/**/*.cy.js",
+    specPattern: 'cypress/e2e/Pipedrive/Web/tests/[0-9]*_*.cy.js',
     baseUrl: process.env.CYPRESS_BASE_URL || 'https://app.pipedrive.com',
     chromeWebSecurity: false,
     defaultCommandTimeout: 10000,
     pageLoadTimeout: 30000,
     screenshotOnRunFailure: true,
-    trashAssetsBeforeRuns: true,
+    trashAssetsBeforeRuns: false,
     video: true,
     viewportHeight: 720,
     viewportWidth: 1280,
     retries: {
       runMode: 2,
       openMode: 0
-    }
+    },
+    screenshotsFolder: 'cypress/screenshots',
+    videosFolder: 'cypress/videos'
   },
 });

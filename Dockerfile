@@ -10,11 +10,11 @@ COPY package*.json ./
 RUN npm ci
 
 # Create necessary directories with proper permissions
-RUN mkdir -p cypress/reports/mochawesome \
-    && mkdir -p cypress/reports/mochawesome/.jsons \
-    && mkdir -p cypress/screenshots \
-    && mkdir -p cypress/videos \
-    && chmod -R 777 cypress
+RUN mkdir -p /e2e/cypress/reports/mochawesome \
+    && mkdir -p /e2e/cypress/reports/mochawesome/.jsons \
+    && mkdir -p /e2e/cypress/screenshots \
+    && mkdir -p /e2e/cypress/videos \
+    && chmod -R 777 /e2e/cypress
 
 # Copy the rest of the project files
 COPY . .
