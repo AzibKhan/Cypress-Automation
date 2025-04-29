@@ -9,6 +9,13 @@ COPY package*.json ./
 # Install dependencies
 RUN npm ci
 
+# Create necessary directories
+RUN mkdir -p cypress/reports/mochawesome \
+    && mkdir -p cypress/reports/mochawesome/.jsons \
+    && mkdir -p cypress/screenshots \
+    && mkdir -p cypress/videos \
+    && chmod -R 777 cypress
+
 # Copy the rest of the project files
 COPY . .
 

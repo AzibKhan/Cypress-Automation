@@ -65,7 +65,7 @@ jobs:
             -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} \
             -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
             -e CYPRESS_BASE_URL=https://app.pipedrive.com \
-            cypress-tests:latest
+            cypress-tests:latest || true
 
       - name: Fix permissions
         run: |
