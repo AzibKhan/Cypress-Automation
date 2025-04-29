@@ -54,8 +54,20 @@ jobs:
           # Check if we have any JSON files
           if [ -z "$(find cypress/reports/mochawesome/.jsons/ -name '*.json')" ]; then
             echo "No reports found to merge."
-            # Create a dummy JSON file to prevent failure
-            echo '{"results": []}' > cypress/reports/mochawesome/.jsons/dummy.json
+            # Create a properly formatted dummy JSON file
+            echo '{
+              "stats": {
+                "suites": 0,
+                "tests": 0,
+                "passes": 0,
+                "pending": 0,
+                "failures": 0,
+                "start": "2024-04-29T00:00:00.000Z",
+                "end": "2024-04-29T00:00:00.000Z",
+                "duration": 0
+              },
+              "results": []
+            }' > cypress/reports/mochawesome/.jsons/dummy.json
           fi
           # Generate the report
           npm run merge:reports
