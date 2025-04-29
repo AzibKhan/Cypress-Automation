@@ -140,16 +140,13 @@ class ContactPage {
             .should('be.visible')
             .should('not.be.disabled')
             .click();
-
-        // Wait for dialog
-        cy.wait(2000);
-
+            
         // Try to click the delete button in the dialog
         cy.get('body').then(() => {
             // Try different approaches to find and click the delete button
             cy.get('.cui5-dialog__actions button, button.cui5-button--variant-negative, button:contains("Delete")')
                 .filter(':visible')
-                .first()
+                .eq(1)
                 .click({ force: true });
         });
     }
@@ -158,37 +155,17 @@ class ContactPage {
         // Visit contacts page
         this.visit();
 
-        // Add retry mechanism
-        let attempts = 0;
-        const maxAttempts = 3;
-
-        const attemptDeletion = () => {
-            attempts++;
-            cy.log(`Deletion attempt ${attempts} of ${maxAttempts}`);
-
-            // Select all contacts
-            this.selectAllContacts();
-
-            // Attempt to delete with retries
-            cy.then(() => {
-                // Click delete and confirm
-                this.clickDeleteAndConfirm();
-
-                // Verify success or retry
-                cy.get('body').then($body => {
-                    if ($body.find(':contains("deleted successfully")').length > 0) {
-                        cy.log('Deletion successful');
-                    } else if (attempts < maxAttempts) {
-                        cy.log('Deletion verification failed, retrying...');
-                        cy.wait(2000);
-                        attemptDeletion();
-                    }
-                });
-            });
+        // Select all contacts
+        this.selectAllContacts();
+    
+        // Click delete and confirm
+        this.clickDeleteAndConfirm();
+    
+        // Verify success message
+        cy.contains('deleted successfully', { timeout: 5000 }).should('be.visible');
+    
         };
-
-        attemptDeletion();
-    }
+    
 
     // Verification Methods
     verifyContactCreation(contactName) {

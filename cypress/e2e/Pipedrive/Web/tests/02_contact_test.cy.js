@@ -1,5 +1,5 @@
 import LoginPage from '../pages/LoginPage';
-import ContactPage from '../pages/contactPage';
+import ContactPage from '../pages/ContactPage';
 
 describe('Pipedrive Contact Management', () => {
     let testData;
@@ -99,7 +99,7 @@ describe('Pipedrive Contact Management', () => {
         });
     });
     
-    it('Should show an error of the first field if all fields are empty', () => {
+    it('Should show an error of the name field if all fields are empty', () => {
         cy.wrap(null).then(() => {
             // Use POM to navigate to Contacts > People
             contactPage.visit();
@@ -115,7 +115,7 @@ describe('Pipedrive Contact Management', () => {
         });
     });
     
-    it('Should delete the contact created', () => {
+    it('Should delete all the contacts', () => {
         cy.wrap(null).then(() => {
             // Use the Page Object Model to delete the contact
             contactPage.deleteContact();
