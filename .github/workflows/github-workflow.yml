@@ -47,6 +47,11 @@ jobs:
           echo "Current directory structure:"
           find cypress -type d
           echo -e "\nGenerating reports..."
+          # Create .jsons directory if it doesn't exist
+          mkdir -p cypress/reports/mochawesome/.jsons
+          # Move any JSON files to .jsons directory
+          find cypress/reports/mochawesome -name "*.json" -exec mv {} cypress/reports/mochawesome/.jsons/ \;
+          # Check if we have any JSON files
           if [ -z "$(find cypress/reports/mochawesome/.jsons/ -name '*.json')" ]; then
             echo "No reports found to merge."
             exit 1
