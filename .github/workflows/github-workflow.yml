@@ -20,29 +20,81 @@ jobs:
           sudo apt-get install -y docker.io
           sudo systemctl start docker
           sudo systemctl enable docker
+          sudo docker info
+          echo "Docker setup completed"
 
       - name: Build Docker image
-        run: docker build -t cypress-automation .
-
-      - name: Create reports directory
         run: |
-          mkdir -p cypress/reports/mochawesome
+          echo "Building Docker image..."
+          docker build -t cypress-automation .
+          echo "Docker image built successfully"
+
+      - name: Create and verify directories
+        run: |
+          echo "Creating directories..."
           mkdir -p cypress/reports/mochawesome/.jsons
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
+          echo "Directory structure:"
+          tree cypress || echo "tree command not available"
+          ls -R cypress
 
       - name: Run Cypress tests in Docker container
         run: |
-          docker run --rm -v "${PWD}:/e2e" -w /e2e -e CYPRESS_BASE_URL=${{ secrets.CYPRESS_BASE_URL }} \
-          -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
-          cypress-automation npm run test:chrome
+          echo "Running Cypress tests..."
+          docker run --rm \
+            -v "${PWD}:/e2e" \
+            -w /e2e \
+            -e CYPRESS_BASE_URL=${{ secrets.CYPRESS_BASE_URL }} \
+            -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} \
+            -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
+            cypress-automation npm run test:chrome
         continue-on-error: true
+
+      - name: Debug test results
+        if: always()
+        run: |
+          echo "Checking test results..."
+          echo "Contents of cypress/reports/mochawesome/.jsons:"
+          ls -la cypress/reports/mochawesome/.jsons || echo "No .jsons directory found"
+          echo "Contents of cypress/reports/mochawesome:"
+          ls -la cypress/reports/mochawesome || echo "No mochawesome directory found"
+          echo "Contents of cypress/screenshots:"
+          ls -la cypress/screenshots || echo "No screenshots directory found"
+          echo "Contents of cypress/videos:"
+          ls -la cypress/videos || echo "No videos directory found"
 
       - name: Generate Mochawesome report
         if: always()
         run: |
-          docker run --rm -v "${PWD}:/e2e" -w /e2e cypress-automation npm run generate:all-reports
+          echo "Generating Mochawesome report..."
+          docker run --rm \
+            -v "${PWD}:/e2e" \
+            -w /e2e \
+            cypress-automation bash -c "
+              if [ ! -d 'cypress/reports/mochawesome/.jsons' ]; then
+                mkdir -p cypress/reports/mochawesome/.jsons
+              fi
+              if [ -z \"$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)\" ]; then
+                echo 'No test reports found, creating dummy report...'
+                echo '{\"results\":[{\"suites\":[{\"tests\":[{\"title\":\"No tests executed\",\"state\":\"skipped\"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json
+              fi
+              npm run merge:reports
+              npm run generate:report
+            "
+          echo "Report generation completed"
+
+      - name: Verify report generation
+        if: always()
+        run: |
+          echo "Verifying report generation..."
+          if [ -f "cypress/reports/mochawesome/report.html" ]; then
+            echo "Report generated successfully"
+          else
+            echo "Report generation failed"
+            exit 1
+          fi
 
       - name: Upload Mochawesome Report
         if: always()
