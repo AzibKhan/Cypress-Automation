@@ -21,7 +21,10 @@ jobs:
           cache: 'npm'
             
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          npm install -g mochawesome-merge mochawesome-report-generator
+          npm list -g --depth=0
         
       - name: Create reports directory
         run: |
@@ -41,9 +44,12 @@ jobs:
             -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} \
             -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
             cypress/included:12.17.4 \
-            --browser chrome \
-            --reporter mochawesome \
-            --reporter-options reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true
+            --config reporter=cypress-mochawesome-reporter \
+            --config reporterOptions.reportDir=cypress/reports/mochawesome \
+            --config reporterOptions.overwrite=false \
+            --config reporterOptions.html=false \
+            --config reporterOptions.json=true \
+            --browser chrome
         continue-on-error: true
         
       - name: Generate Mochawesome report
@@ -52,8 +58,12 @@ jobs:
           echo "Current directory structure:"
           find cypress -type d
           echo -e "\nGenerating reports..."
-          npm run merge:reports || echo "Failed to merge reports"
-          npm run generate:report || echo "Failed to generate report"
+          if [ -z "$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)" ]; then
+            echo 'No test reports found, creating dummy report...'
+            echo '{"results":[{"suites":[{"tests":[{"title":"No tests executed","state":"skipped"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json
+          fi
+          npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged.json
+          npx marge cypress/reports/mochawesome/merged.json -f report -o cypress/reports/mochawesome
           echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
       - name: Upload Mochawesome Report
