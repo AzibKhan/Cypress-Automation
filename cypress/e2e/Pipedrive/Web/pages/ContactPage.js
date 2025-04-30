@@ -1,4 +1,4 @@
-class contactPage {
+class ContactPage {
     constructor() {
         this.TIMEOUTS = {
             DEFAULT: 10000,
