@@ -19,12 +19,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-            
       - name: Install dependencies
         run: |
           apt-get update
@@ -59,6 +53,7 @@ jobs:
           npm run generate:report || echo "Failed to generate report"
           echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
+          
       - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
