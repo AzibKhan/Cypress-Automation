@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  cypress-run:
+  cypress-docker-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -16,17 +16,30 @@ jobs:
         
       - name: Setup Docker
         run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
+          echo "Setting up Docker..."
+          curl -fsSL https://get.docker.com -o get-docker.sh
+          sudo sh get-docker.sh
+          sudo usermod -aG docker $USER
           sudo systemctl start docker
           sudo systemctl enable docker
-          sudo docker info
+          docker --version
           echo "Docker setup completed"
+
+      - name: Debug Dockerfile
+        run: |
+          echo "Listing Dockerfile content..."
+          cat Dockerfile || echo "Dockerfile not found"
+          echo "Checking current directory..."
+          ls -la
+          echo "Checking Docker context..."
+          find . -type f -name "Dockerfile" -o -name "docker-compose.yml"
 
       - name: Build Docker image
         run: |
           echo "Building Docker image..."
-          docker build -t cypress-automation .
+          docker build -t cypress-automation . --no-cache
+          echo "Verifying Docker image..."
+          docker images | grep cypress-automation
           echo "Docker image built successfully"
 
       - name: Create and verify directories

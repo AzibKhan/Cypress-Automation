@@ -19,9 +19,11 @@
     "test:electron": "cypress run --browser electron --headless",
     "test:all-browsers": "npm run test:chrome && npm run test:firefox && npm run test:electron",
     "clean:reports": "rm -rf cypress/reports/mochawesome/* cypress/screenshots/* cypress/videos/*",
+    "create:dummy-report": "mkdir -p cypress/reports/mochawesome/.jsons && echo '{\"results\":[{\"suites\":[{\"tests\":[{\"title\":\"No tests executed\",\"state\":\"skipped\"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json",
     "merge:reports": "if [ -z \"$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)\" ]; then npm run create:dummy-report; fi && npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged-output.json",
     "generate:report": "npx marge cypress/reports/mochawesome/merged-output.json -f report -o cypress/reports/mochawesome",
     "generate:all-reports": "npm run merge:reports && npm run generate:report",
+    "verify:reports": "if [ ! -f \"cypress/reports/mochawesome/report.html\" ]; then echo 'Report generation failed' && exit 1; fi",
     "docker:build": "docker build -t cypress-automation .",
     "docker:run": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation",
     "docker:test": "npm run docker:build && npm run docker:run",
@@ -30,8 +32,12 @@
     "docker:test:all": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:all-browsers",
     "docker:test:login": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:login",
     "docker:test:contact": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:contact",
-    "docker:test:reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation npm run generate:all-reports"
-},
+    "docker:test:reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation npm run generate:all-reports",
+    "preinstall": "npm install -g mochawesome-merge mochawesome-report-generator",
+    "postinstall": "npm run verify:reports || true",
+    "pretest": "npm run clean:reports",
+    "posttest": "npm run generate:all-reports"
+  },
   "keywords": [
     "cypress",
     "automation",
@@ -47,5 +53,9 @@
     "mochawesome": "^7.1.3",
     "mochawesome-merge": "^4.3.0",
     "mochawesome-report-generator": "^6.2.0"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
   }
 }
