@@ -25,8 +25,9 @@ RUN useradd -m -u 1001 cypress
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
+# Install dependencies and global tools
 RUN npm ci && \
+    npm install -g mochawesome-merge mochawesome-report-generator && \
     npm cache clean --force
 
 # Create necessary directories
@@ -44,6 +45,7 @@ ENV CYPRESS_VIDEO=true
 ENV CYPRESS_SCREENSHOTS=true
 ENV CYPRESS_REPORTS=true
 ENV DISPLAY=:99
+ENV PATH="/e2e/node_modules/.bin:${PATH}"
 
 # Switch to non-root user
 USER cypress
