@@ -25,22 +25,20 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Fix APT permissions and install dependencies
+      - name: Install dependencies
         run: |
-          sudo chmod -R 755 /var/lib/apt/lists
-          sudo apt-get update
-          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+          apt-get update
+          apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Install npm dependencies
         run: npm ci
 
       - name: Create and set permissions for report directories
         run: |
-          sudo mkdir -p cypress/reports/mochawesome/.jsons
-          sudo mkdir -p cypress/screenshots
-          sudo mkdir -p cypress/videos
-          sudo chown -R 1001:1001 cypress
-          sudo chmod -R 777 cypress
+          mkdir -p cypress/reports/mochawesome/.jsons
+          mkdir -p cypress/screenshots
+          mkdir -p cypress/videos
+          chmod -R 777 cypress
 
       - name: Run Cypress tests
         env:
@@ -56,15 +54,14 @@ jobs:
           echo "Current directory structure:"
           find cypress -type d
           echo -e "\nGenerating reports..."
-          
+
           # Ensure .jsons directory exists with proper permissions
-          sudo mkdir -p cypress/reports/mochawesome/.jsons
-          sudo chown -R 1001:1001 cypress/reports
-          sudo chmod -R 777 cypress/reports
-          
+          mkdir -p cypress/reports/mochawesome/.jsons
+          chmod -R 777 cypress/reports
+
           # Move any JSON files to .jsons directory if they're not already there
           find cypress/reports/mochawesome -maxdepth 1 -name "*.json" -exec mv {} cypress/reports/mochawesome/.jsons/ \;
-          
+
           # Check if we have any JSON files
           if [ -z "$(find cypress/reports/mochawesome/.jsons/ -name '*.json')" ]; then
             echo "No reports found to merge."
@@ -125,13 +122,13 @@ jobs:
               }
             }' > cypress/reports/mochawesome/.jsons/dummy.json
           fi
-          
+
           # Generate the report
           echo "Merging reports..."
           npm run merge:reports
           echo "Generating final report..."
           npm run generate:report
-          
+
           echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
 
@@ -160,4 +157,4 @@ jobs:
           name: cypress-videos
           path: cypress/videos
           retention-days: 5
-          if-no-files-found: warn 
+          if-no-files-found: warn
