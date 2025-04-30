@@ -25,18 +25,22 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Fix APT permissions and install dependencies
         run: |
-          npm ci
-          # Install system dependencies required for Cypress
-          apt-get update && apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+          sudo chmod -R 755 /var/lib/apt/lists
+          sudo apt-get update
+          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
-      - name: Create reports directory
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Create and set permissions for report directories
         run: |
-          mkdir -p cypress/reports/mochawesome/.jsons
-          mkdir -p cypress/screenshots
-          mkdir -p cypress/videos
-          chmod -R 777 cypress
+          sudo mkdir -p cypress/reports/mochawesome/.jsons
+          sudo mkdir -p cypress/screenshots
+          sudo mkdir -p cypress/videos
+          sudo chown -R 1001:1001 cypress
+          sudo chmod -R 777 cypress
 
       - name: Run Cypress tests
         env:
@@ -53,8 +57,10 @@ jobs:
           find cypress -type d
           echo -e "\nGenerating reports..."
           
-          # Ensure .jsons directory exists
-          mkdir -p cypress/reports/mochawesome/.jsons
+          # Ensure .jsons directory exists with proper permissions
+          sudo mkdir -p cypress/reports/mochawesome/.jsons
+          sudo chown -R 1001:1001 cypress/reports
+          sudo chmod -R 777 cypress/reports
           
           # Move any JSON files to .jsons directory if they're not already there
           find cypress/reports/mochawesome -maxdepth 1 -name "*.json" -exec mv {} cypress/reports/mochawesome/.jsons/ \;
