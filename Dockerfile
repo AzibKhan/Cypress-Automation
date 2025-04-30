@@ -44,12 +44,10 @@ ENV CYPRESS_BASE_URL=https://app.pipedrive.com
 ENV CYPRESS_VIDEO=true
 ENV CYPRESS_SCREENSHOTS=true
 ENV CYPRESS_REPORTS=true
-ENV DISPLAY=:99
 ENV PATH="/e2e/node_modules/.bin:${PATH}"
 
 # Switch to non-root user
 USER cypress
 
-# Start Xvfb and run Cypress
-CMD Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & \
-    npx cypress run --config video=true,screenshotOnRunFailure=true,trashAssetsBeforeRuns=false 
+# Run Cypress
+CMD npx cypress run --config video=true,screenshotOnRunFailure=true,trashAssetsBeforeRuns=false 

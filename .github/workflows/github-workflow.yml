@@ -109,6 +109,8 @@ jobs:
           npm run generate:report || echo "Failed to generate report"
           echo "Report directory contents:"
           ls -R cypress/reports/mochawesome
+          echo "Checking merged output:"
+          cat cypress/reports/mochawesome/merged-output.json || echo "No merged output found"
 
       - name: Upload Mochawesome Report
         if: always()
