@@ -65,12 +65,23 @@ jobs:
           echo "Current directory structure:"
           sudo find cypress -type d
           echo -e "\nGenerating reports..."
+          # Ensure .jsons directory exists
+          mkdir -p cypress/reports/mochawesome/.jsons
+          chmod 777 cypress/reports/mochawesome/.jsons
+          
           if [ -z "$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)" ]; then
             echo 'No test reports found, creating dummy report...'
             echo '{"results":[{"suites":[{"tests":[{"title":"No tests executed","state":"skipped"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json
+            chmod 666 cypress/reports/mochawesome/.jsons/dummy.json
           fi
+          
+          echo "Merging reports..."
           npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged.json
+          chmod 666 cypress/reports/mochawesome/merged.json
+          
+          echo "Generating HTML report..."
           npx marge cypress/reports/mochawesome/merged.json -f report -o cypress/reports/mochawesome
+          
           echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
       - name: Upload Mochawesome Report
