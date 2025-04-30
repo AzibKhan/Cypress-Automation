@@ -12,41 +12,37 @@ jobs:
     name: Cypress Tests
     runs-on: ubuntu-latest
     container:
-      image: cypress/included:latest
+      image: cypress/included:14.3.2
       options: |
         --user 1001
         -v ${{ github.workspace }}:/e2e
         -w /e2e
+    timeout-minutes: 30
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
+      - name: Debug environment
+        run: |
+          echo "Current user: $(whoami)"
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+        
       - name: Install system dependencies
         run: |
           apt-get update
-          apt-get install -y \
-            libgtk2.0-0 \
-            libgtk-3-0 \
-            libgbm-dev \
-            libnotify-dev \
-            libgconf-2-4 \
-            libnss3 \
-            libxss1 \
-            libasound2 \
-            libxtst6 \
-            xauth \
-            xvfb
-
-      - name: Start Xvfb for virtual display
-        run: |
-          Xvfb :99 -ac -screen 0 1280x1024x24 &
-          export DISPLAY=:99
+          apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Install npm dependencies
         run: |
           npm ci
           npm cache verify
-
+          echo "Node modules installed successfully"
+          ls -la node_modules
+        
       - name: Create reports directory
         run: |
           mkdir -p cypress/reports/mochawesome
@@ -54,26 +50,32 @@ jobs:
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
-
+          echo "Directory structure created:"
+          find cypress -type d
+        
       - name: Run Cypress tests
-        run: npm run test:chrome
+        run: |
+          echo "Starting Cypress tests..."
+          npm run test:chrome
         continue-on-error: true
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-
+          
       - name: Generate Mochawesome report
         if: always()
         run: |
           echo "Current directory structure:"
           find cypress -type d
+          echo -e "\nChecking for JSON files:"
+          find cypress/reports/mochawesome/.jsons -type f
           echo -e "\nGenerating reports..."
           npm run merge:reports || echo "Failed to merge reports"
           npm run generate:report || echo "Failed to generate report"
           echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
-
+          
       - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
