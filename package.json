@@ -31,13 +31,7 @@
     "docker:test:firefox": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:firefox",
     "docker:test:all": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:all-browsers",
     "docker:test:login": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:login",
-    "docker:test:contact": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:contact",
-    "docker:test:reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation npm run generate:all-reports",
-    "preinstall": "npm install -g mochawesome-merge mochawesome-report-generator",
-    "postinstall": "npm run verify:reports || true",
-    "pretest": "npm run clean:reports",
-    "posttest": "npm run generate:all-reports",
-    "generate-reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation bash -c \"npm install && echo 'Merging reports...' && npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged.json && echo 'Generating HTML report...' && npx mochawesome-report-generator cypress/reports/mochawesome/merged.json -o cypress/reports/mochawesome\""
+    "docker:test:contact": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:contact"
   },
   "keywords": [
     "cypress",
