@@ -14,11 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '18'
+      #     cache: 'npm'
 
       - name: Install dependencies
         run: |
@@ -113,7 +113,7 @@ jobs:
               fi
               if [ -z \"$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)\" ]; then
                 echo 'No test reports found, creating dummy report...'
-                echo '{\"results\":[{\"suites\":[{\"tests\":[{\"title\":\"No tests executed\",\"state\":\"skipped\"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json
+                echo '{"results":[{"suites":[{"tests":[{"title": "No tests executed","state": "skipped"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json
               fi
               echo 'Merging reports...'
               npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged.json || exit 1
