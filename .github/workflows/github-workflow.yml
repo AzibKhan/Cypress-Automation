@@ -89,6 +89,26 @@ jobs:
                     "timestamp": "2024-04-29T00:00:00.000Z"
                   },
                   "version": "10.2.0"
+                },
+                "marge": {
+                  "options": {
+                    "reportDir": "cypress/reports/mochawesome",
+                    "reportFilename": "report",
+                    "reportTitle": "Cypress Test Report",
+                    "reportPageTitle": "Cypress Test Report",
+                    "timestamp": "2024-04-29T00:00:00.000Z",
+                    "charts": true,
+                    "code": true,
+                    "autoOpen": false,
+                    "overwrite": false,
+                    "cdn": true,
+                    "saveJson": true,
+                    "saveHtml": true,
+                    "saveAllVideos": true,
+                    "inline": true,
+                    "quiet": false
+                  },
+                  "version": "6.2.0"
                 }
               }
             }' > cypress/reports/mochawesome/.jsons/dummy.json

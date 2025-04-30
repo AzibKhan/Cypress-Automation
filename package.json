@@ -12,6 +12,7 @@
     "cypress:run:edge": "cypress run --browser edge",
     "test": "cypress run",
     "test:login": "cypress run --spec 'cypress/e2e/Pipedrive/Web/tests/01_login_test.cy.js'",
+    "test:contact": "cypress run --spec 'cypress/e2e/Pipedrive/Web/tests/02_contact_test.cy.js'",
     "test:all-ordered": "cypress run --spec 'cypress/e2e/Pipedrive/Web/tests/01_login_test.cy.js' && cypress run --spec 'cypress/e2e/Pipedrive/Web/tests/*.cy.js'",
     "test:chrome": "cypress run --browser chrome --headless",
     "test:firefox": "cypress run --browser firefox --headless",
