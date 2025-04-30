@@ -11,6 +11,9 @@ jobs:
   cypress-run:
     name: Cypress Tests
     runs-on: ubuntu-latest
+    container:
+      image: cypress/included:latest
+      options: --user 1001
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -23,7 +26,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          npm ci
+          # Install system dependencies required for Cypress
+          apt-get update && apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Create reports directory
         run: |
