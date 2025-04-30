@@ -41,4 +41,9 @@ coverage/
 dist/
 build/
 *.zip
-*.tar.gz 
+*.tar.gz
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose.yml 

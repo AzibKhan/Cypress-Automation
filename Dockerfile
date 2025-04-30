@@ -1,9 +1,10 @@
+# Use the official Cypress image as base
 FROM cypress/included:14.3.2
 
 # Set working directory
 WORKDIR /e2e
 
-# Install additional system dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     fonts-liberation \
     libasound2 \
@@ -15,7 +16,11 @@ RUN apt-get update && apt-get install -y \
     libdrm2 \
     libxkbcommon0 \
     libxshmfence1 \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user
+RUN useradd -m -u 1001 cypress
 
 # Copy package files
 COPY package*.json ./
@@ -24,31 +29,25 @@ COPY package*.json ./
 RUN npm ci && \
     npm cache clean --force
 
-# Create necessary directories with proper permissions
-RUN mkdir -p /e2e/cypress/reports/mochawesome \
-    && mkdir -p /e2e/cypress/reports/mochawesome/.jsons \
-    && mkdir -p /e2e/cypress/screenshots \
-    && mkdir -p /e2e/cypress/videos \
-    && chmod -R 777 /e2e/cypress
+# Create necessary directories
+RUN mkdir -p /e2e/cypress/reports/mochawesome/.jsons \
+    /e2e/cypress/screenshots \
+    /e2e/cypress/videos \
+    && chown -R cypress:cypress /e2e
 
 # Copy the rest of the project files
-COPY . .
+COPY --chown=cypress:cypress . .
 
 # Set environment variables
 ENV CYPRESS_BASE_URL=https://app.pipedrive.com
-ENV CYPRESS_EMAIL=${CYPRESS_EMAIL}
-ENV CYPRESS_PASSWORD=${CYPRESS_PASSWORD}
 ENV CYPRESS_VIDEO=true
 ENV CYPRESS_SCREENSHOTS=true
 ENV CYPRESS_REPORTS=true
 ENV DISPLAY=:99
 
-# Create a non-root user
-RUN useradd -m -u 1001 cypress && \
-    chown -R cypress:cypress /e2e
-
 # Switch to non-root user
 USER cypress
 
-# Command to run Cypress tests with explicit configuration
-CMD ["npx", "cypress", "run", "--config", "video=true,screenshotOnRunFailure=true,trashAssetsBeforeRuns=false"] 
+# Start Xvfb and run Cypress
+CMD Xvfb :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & \
+    npx cypress run --config video=true,screenshotOnRunFailure=true,trashAssetsBeforeRuns=false 
