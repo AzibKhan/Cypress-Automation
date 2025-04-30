@@ -19,7 +19,6 @@
     "test:electron": "cypress run --browser electron --headless",
     "test:all-browsers": "npm run test:chrome && npm run test:firefox && npm run test:electron",
     "clean:reports": "rm -rf cypress/reports/mochawesome/* cypress/screenshots/* cypress/videos/*",
-    "create:dummy-report": "mkdir -p cypress/reports/mochawesome/.jsons && echo '{\"stats\":{\"suites\":0,\"tests\":0,\"passes\":0,\"pending\":0,\"failures\":0,\"start\":\"$(date -u +\"%Y-%m-%dT%H:%M:%S.000Z\")\",\"end\":\"$(date -u +\"%Y-%m-%dT%H:%M:%S.000Z\")\",\"duration\":0},\"results\":[]}' > cypress/reports/mochawesome/.jsons/dummy.json",
     "merge:reports": "if [ -z \"$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)\" ]; then npm run create:dummy-report; fi && npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged-output.json",
     "generate:report": "npx marge cypress/reports/mochawesome/merged-output.json -f report -o cypress/reports/mochawesome",
     "generate:all-reports": "npm run merge:reports && npm run generate:report",
@@ -31,9 +30,8 @@
     "docker:test:all": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:all-browsers",
     "docker:test:login": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:login",
     "docker:test:contact": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation npm run test:contact",
-    "docker:test:reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation npm run generate:all-reports",
-    "docker:debug": "docker run --rm -it -v \"${PWD}:/e2e\" -w /e2e -e CYPRESS_BASE_URL=https://app.pipedrive.com -e CYPRESS_EMAIL=${CYPRESS_EMAIL} -e CYPRESS_PASSWORD=${CYPRESS_PASSWORD} cypress-automation /bin/bash"
-  },
+    "docker:test:reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation npm run generate:all-reports"
+},
   "keywords": [
     "cypress",
     "automation",

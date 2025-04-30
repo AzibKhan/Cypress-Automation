@@ -14,15 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-            
-      - name: Install dependencies
-        run: npm ci
-        
+      - name: Setup Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker.io
+          sudo systemctl start docker
+          sudo systemctl enable docker
+
+      - name: Build Docker image
+        run: docker build -t cypress-automation .
+
       - name: Create reports directory
         run: |
           mkdir -p cypress/reports/mochawesome
@@ -30,25 +31,19 @@ jobs:
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
-        
-      - name: Run Cypress tests
-        run: npm run test:chrome
+
+      - name: Run Cypress tests in Docker container
+        run: |
+          docker run --rm -v "${PWD}:/e2e" -w /e2e -e CYPRESS_BASE_URL=${{ secrets.CYPRESS_BASE_URL }} \
+          -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
+          cypress-automation npm run test:chrome
         continue-on-error: true
-        env:
-          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
-          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-          
+
       - name: Generate Mochawesome report
         if: always()
         run: |
-          echo "Current directory structure:"
-          find cypress -type d
-          echo -e "\nGenerating reports..."
-          npm run merge:reports || echo "Failed to merge reports"
-          npm run generate:report || echo "Failed to generate report"
-          echo -e "\nReport directory contents:"
-          ls -R cypress/reports/mochawesome
+          docker run --rm -v "${PWD}:/e2e" -w /e2e cypress-automation npm run generate:all-reports
+
       - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -71,4 +66,4 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-          retention-days: 5 
+          retention-days: 5
