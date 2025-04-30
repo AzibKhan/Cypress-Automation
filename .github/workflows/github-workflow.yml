@@ -27,8 +27,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+          apt-get update
+          apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
 
       - name: Install npm dependencies
         run: npm ci
@@ -54,18 +54,20 @@ jobs:
           echo "Current directory structure:"
           find cypress -type d
           echo -e "\nGenerating reports..."
-
+          
           # Ensure .jsons directory exists with proper permissions
           mkdir -p cypress/reports/mochawesome/.jsons
           chmod -R 777 cypress/reports
-
+          
+          echo "Looking for JSON files..."
+          find cypress/reports/mochawesome -name "*.json" -print
+          
           # Move any JSON files to .jsons directory if they're not already there
           find cypress/reports/mochawesome -maxdepth 1 -name "*.json" -exec mv {} cypress/reports/mochawesome/.jsons/ \;
-
+          
           # Check if we have any JSON files
           if [ -z "$(find cypress/reports/mochawesome/.jsons/ -name '*.json')" ]; then
-            echo "No reports found to merge."
-            # Create a properly formatted dummy JSON file with all required fields
+            echo "No reports found to merge. Creating a dummy report."
             echo '{
               "stats": {
                 "suites": 0,
@@ -122,12 +124,39 @@ jobs:
               }
             }' > cypress/reports/mochawesome/.jsons/dummy.json
           fi
-
+          
           # Generate the report
           echo "Merging reports..."
-          npm run merge:reports
+          npm run merge:reports || echo "Merge failed."
           echo "Generating final report..."
-          npm run generate:report
+          npm run generate:report || echo "Report generation failed."
+          
+          echo -e "\nFinal report directory contents:"
+          ls -R cypress/reports/mochawesome
 
-          echo -e "\nReport directory contents:"
-          ls -
+      - name: Upload Mochawesome Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mochawesome-report
+          path: cypress/reports/mochawesome
+          retention-days: 5
+          if-no-files-found: warn
+
+      - name: Upload Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          retention-days: 5
+          if-no-files-found: warn
+
+      - name: Upload Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          retention-days: 5
+          if-no-files-found: warn

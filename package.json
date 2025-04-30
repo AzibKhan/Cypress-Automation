@@ -19,10 +19,9 @@
     "test:electron": "cypress run --browser electron --headless",
     "test:all-browsers": "npm run test:chrome && npm run test:firefox && npm run test:electron",
     "clean:reports": "rm -rf cypress/reports/* cypress/reports/mochawesome/* cypress/reports/mochawesome/.jsons/* cypress/screenshots/* cypress/videos/*",
-    "merge:reports": "npx mochawesome-merge --reportDir cypress/reports/mochawesome/.jsons > cypress/reports/mochawesome/mochawesome.json",
-    "generate:report":"npx marge cypress/reports/mochawesome/mochawesome.json -f report -o cypress/reports/mochawesome"
-
-    
+    "merge:reports": "mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged-output.json",
+    "generate:report": "marge cypress/reports/mochawesome/merged-output.json -f report -o cypress/reports/mochawesome",
+    "generate:all-reports": "npm run merge:reports && npm run generate:report"
   },
   "keywords": [
     "cypress",
