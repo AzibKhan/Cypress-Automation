@@ -42,19 +42,26 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
+          npm install
           npm install -g mochawesome-merge mochawesome-report-generator
           npm cache verify
           echo "Installed global packages:"
           npm list -g --depth=0
+          echo "Installed local packages:"
+          npm list --depth=0
 
       - name: Verify mochawesome tools
         run: |
           echo "Verifying mochawesome tools..."
-          which mochawesome-merge || echo "mochawesome-merge not found"
-          which marge || echo "marge not found"
-          echo "Checking local node_modules:"
-          ls -la node_modules/.bin/mochawesome-merge
-          ls -la node_modules/.bin/marge
+          echo "Checking global installation:"
+          which mochawesome-merge || echo "mochawesome-merge not found globally"
+          which marge || echo "marge not found globally"
+          echo "Checking local installation:"
+          ls -la node_modules/.bin/mochawesome-merge || echo "mochawesome-merge not found locally"
+          ls -la node_modules/.bin/marge || echo "marge not found locally"
+          echo "Checking npx availability:"
+          npx mochawesome-merge --version || echo "mochawesome-merge not available via npx"
+          npx marge --version || echo "marge not available via npx"
 
       - name: Setup test environment
         run: |
@@ -94,9 +101,11 @@ jobs:
         if: always()
         run: |
           echo "Generating reports..."
-          echo "Using mochawesome-merge from: $(which mochawesome-merge)"
-          echo "Using marge from: $(which marge)"
+          echo "Using mochawesome-merge from: $(which mochawesome-merge || echo 'not found')"
+          echo "Using marge from: $(which marge || echo 'not found')"
+          echo "Running merge:reports script..."
           npm run merge:reports || echo "Failed to merge reports"
+          echo "Running generate:report script..."
           npm run generate:report || echo "Failed to generate report"
           echo "Report directory contents:"
           ls -R cypress/reports/mochawesome
