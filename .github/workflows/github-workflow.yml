@@ -9,109 +9,46 @@ on:
 
 jobs:
   cypress-run:
-    name: Cypress Tests
     runs-on: ubuntu-latest
-    container:
-      image: cypress/included:14.3.2
-      options: >
-        --user 1001
-        -v "${{ github.workspace }}:/e2e"
-        -w "/e2e"
-    timeout-minutes: 30
-    env:
-      CYPRESS_RETRIES: 2
-      CYPRESS_VIDEO: true
-      CYPRESS_SCREENSHOTS: true
-      DISPLAY: :99
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Debug environment
-        run: |
-          echo "Current user: $(whoami)"
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          echo "Node version: $(node -v)"
-          echo "NPM version: $(npm -v)"
-          echo "Cypress version: $(npx cypress --version)"
-          echo "Docker info:"
-          docker info
-
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+            
       - name: Install dependencies
+        run: npm ci
+        
+      - name: Create reports directory
         run: |
-          npm ci
-          npm install
-          npm install -g mochawesome-merge mochawesome-report-generator
-          npm cache verify
-          echo "Installed global packages:"
-          npm list -g --depth=0
-          echo "Installed local packages:"
-          npm list --depth=0
-
-      - name: Verify mochawesome tools
-        run: |
-          echo "Verifying mochawesome tools..."
-          echo "Checking global installation:"
-          which mochawesome-merge || echo "mochawesome-merge not found globally"
-          which marge || echo "marge not found globally"
-          echo "Checking local installation:"
-          ls -la node_modules/.bin/mochawesome-merge || echo "mochawesome-merge not found locally"
-          ls -la node_modules/.bin/marge || echo "marge not found locally"
-          echo "Checking npx availability:"
-          npx mochawesome-merge --version || echo "mochawesome-merge not available via npx"
-          npx marge --version || echo "marge not available via npx"
-
-      - name: Setup test environment
-        run: |
+          mkdir -p cypress/reports/mochawesome
           mkdir -p cypress/reports/mochawesome/.jsons
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
-          echo "Created directories:"
-          find cypress -type d
-
-      - name: Clean previous reports
-        run: |
-          npm run clean:reports
-          echo "Cleaned previous reports"
-
+        
       - name: Run Cypress tests
-        run: |
-          echo "Starting Cypress tests..."
-          echo "Test files to run:"
-          find cypress/e2e -name "*.cy.js"
-          npm run test:chrome
+        run: npm run test:chrome
         continue-on-error: true
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
           CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
           CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-
-      - name: Debug test reports
-        if: always()
-        run: |
-          echo "Contents of cypress/reports/mochawesome/.jsons:"
-          ls -la cypress/reports/mochawesome/.jsons || echo "Directory not found"
-          echo "Contents of cypress/reports/mochawesome:"
-          ls -la cypress/reports/mochawesome || echo "Directory not found"
-
+          
       - name: Generate Mochawesome report
         if: always()
         run: |
-          echo "Generating reports..."
-          echo "Using mochawesome-merge from: $(which mochawesome-merge || echo 'not found')"
-          echo "Using marge from: $(which marge || echo 'not found')"
-          echo "Running merge:reports script..."
+          echo "Current directory structure:"
+          find cypress -type d
+          echo -e "\nGenerating reports..."
           npm run merge:reports || echo "Failed to merge reports"
-          echo "Running generate:report script..."
           npm run generate:report || echo "Failed to generate report"
-          echo "Report directory contents:"
+          echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
-          echo "Checking merged output:"
-          cat cypress/reports/mochawesome/merged-output.json || echo "No merged output found"
-
       - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -134,4 +71,4 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-          retention-days: 5
+          retention-days: 5 
