@@ -26,13 +26,20 @@ jobs:
           npm install -g mochawesome-merge mochawesome-report-generator
           npm list -g --depth=0
         
-      - name: Create reports directory
+      - name: Create and set permissions
         run: |
+          echo "Creating directories..."
           mkdir -p cypress/reports/mochawesome
           mkdir -p cypress/reports/mochawesome/.jsons
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
+          mkdir -p cypress/downloads
+          echo "Setting permissions..."
+          sudo chown -R $USER:$USER cypress
           chmod -R 777 cypress
+          echo "Verifying permissions..."
+          ls -la cypress
+          ls -la cypress/downloads
         
       - name: Run Cypress tests in Docker
         run: |
@@ -56,7 +63,7 @@ jobs:
         if: always()
         run: |
           echo "Current directory structure:"
-          find cypress -type d
+          sudo find cypress -type d
           echo -e "\nGenerating reports..."
           if [ -z "$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)" ]; then
             echo 'No test reports found, creating dummy report...'
