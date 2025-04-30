@@ -71,55 +71,7 @@ jobs:
           
           if [ -z "$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)" ]; then
             echo 'No test reports found, creating dummy report...'
-            cat > cypress/reports/mochawesome/.jsons/dummy.json << 'EOF'
-            {
-              "stats": {
-                "suites": 1,
-                "tests": 1,
-                "passes": 0,
-                "pending": 0,
-                "failures": 0,
-                "start": "2024-01-01T00:00:00.000Z",
-                "end": "2024-01-01T00:00:00.000Z",
-                "duration": 0
-              },
-              "results": [{
-                "uuid": "dummy-test",
-                "title": "No tests executed",
-                "fullFile": "dummy.js",
-                "file": "dummy.js",
-                "beforeHooks": [],
-                "afterHooks": [],
-                "tests": [{
-                  "title": "No tests executed",
-                  "fullTitle": "No tests executed",
-                  "timedOut": false,
-                  "duration": 0,
-                  "state": "skipped",
-                  "speed": "fast",
-                  "pass": true,
-                  "fail": false,
-                  "pending": false,
-                  "context": null,
-                  "code": "",
-                  "err": {},
-                  "uuid": "dummy-test-1",
-                  "parentUUID": "dummy-test",
-                  "isHook": false,
-                  "skipped": true
-                }],
-                "suites": [],
-                "passes": [],
-                "failures": [],
-                "pending": [],
-                "skipped": ["No tests executed"],
-                "duration": 0,
-                "root": true,
-                "rootEmpty": true,
-                "_timeout": 2000
-              }]
-            }
-            EOF
+            echo '{"stats":{"suites":1,"tests":1,"passes":0,"pending":0,"failures":0,"start":"2024-01-01T00:00:00.000Z","end":"2024-01-01T00:00:00.000Z","duration":0},"results":[{"uuid":"dummy-test","title":"No tests executed","fullFile":"dummy.js","file":"dummy.js","beforeHooks":[],"afterHooks":[],"tests":[{"title":"No tests executed","fullTitle":"No tests executed","timedOut":false,"duration":0,"state":"skipped","speed":"fast","pass":true,"fail":false,"pending":false,"context":null,"code":"","err":{},"uuid":"dummy-test-1","parentUUID":"dummy-test","isHook":false,"skipped":true}],"suites":[],"passes":[],"failures":[],"pending":[],"skipped":["No tests executed"],"duration":0,"root":true,"rootEmpty":true,"_timeout":2000}]}' > cypress/reports/mochawesome/.jsons/dummy.json
             chmod 666 cypress/reports/mochawesome/.jsons/dummy.json
           fi
           
@@ -132,6 +84,7 @@ jobs:
           
           echo -e "\nReport directory contents:"
           ls -R cypress/reports/mochawesome
+
       - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -154,4 +107,4 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-          retention-days: 5 
+          retention-days: 5
