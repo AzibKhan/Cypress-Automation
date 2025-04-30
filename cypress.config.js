@@ -1,5 +1,4 @@
 const { defineConfig } = require("cypress");
-const mochawesome = require('cypress-mochawesome-reporter/plugin');
 
 module.exports = defineConfig({
   projectId: 'mevvq9',
@@ -22,8 +21,12 @@ module.exports = defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       try {
+        // Verify plugin installation
+        const pluginPath = require.resolve('cypress-mochawesome-reporter/plugin');
+        console.log('Mochawesome reporter plugin found at:', pluginPath);
+        
         // Register the Mochawesome reporter plugin
-        mochawesome(on);
+        require(pluginPath)(on);
 
         // Add task for logging
         on('task', {
@@ -55,22 +58,27 @@ module.exports = defineConfig({
         dirs.forEach(dir => {
           if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
+            console.log(`Created directory: ${dir}`);
           }
         });
-
-        // Verify plugin installation
-        try {
-          require.resolve('cypress-mochawesome-reporter/plugin');
-          console.log('Mochawesome reporter plugin found');
-        } catch (error) {
-          console.error('Mochawesome reporter plugin not found. Installing...');
-          const { execSync } = require('child_process');
-          execSync('npm install cypress-mochawesome-reporter --save-dev', { stdio: 'inherit' });
-        }
 
         return config;
       } catch (error) {
         console.error('Error in setupNodeEvents:', error);
+        // Attempt to install the plugin if missing
+        if (error.code === 'MODULE_NOT_FOUND') {
+          console.log('Attempting to install cypress-mochawesome-reporter...');
+          const { execSync } = require('child_process');
+          try {
+            execSync('npm install cypress-mochawesome-reporter@3.5.0 --save-dev', { stdio: 'inherit' });
+            console.log('Plugin installed successfully');
+            // Retry plugin registration
+            require('cypress-mochawesome-reporter/plugin')(on);
+          } catch (installError) {
+            console.error('Failed to install plugin:', installError);
+            throw installError;
+          }
+        }
         throw error;
       }
     },
