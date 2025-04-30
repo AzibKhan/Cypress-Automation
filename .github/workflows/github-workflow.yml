@@ -15,7 +15,7 @@ jobs:
       image: cypress/included:14.3.2
       options: |
         --user 1001
-        -v ${{ github.workspace }}:/e2e
+        -v /home/runner/work/cypress-automation/cypress-automation:/e2e
         -w /e2e
     timeout-minutes: 30
     env:
