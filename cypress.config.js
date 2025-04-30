@@ -15,7 +15,8 @@ module.exports = defineConfig({
     inlineAssets: true,
     saveAllAttempts: false,
     toConsole: true,
-    quiet: false
+    quiet: false,
+    jsonDir: 'cypress/reports/mochawesome/.jsons'
   },
   e2e: {
     setupNodeEvents(on, config) {
