@@ -31,14 +31,21 @@ jobs:
           mkdir -p cypress/videos
           chmod -R 777 cypress
         
-      - name: Run Cypress tests
-        run: npm run test:chrome
+      - name: Run Cypress tests in Docker
+        run: |
+          echo "Running Cypress tests in Docker..."
+          docker run --rm \
+            -v "${PWD}:/e2e" \
+            -w /e2e \
+            -e CYPRESS_BASE_URL=${{ secrets.CYPRESS_BASE_URL }} \
+            -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL }} \
+            -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD }} \
+            cypress/included:12.17.4 \
+            --browser chrome \
+            --reporter mochawesome \
+            --reporter-options reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true
         continue-on-error: true
-        env:
-          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
-          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
-          
+        
       - name: Generate Mochawesome report
         if: always()
         run: |
