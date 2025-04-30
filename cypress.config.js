@@ -20,8 +20,48 @@ module.exports = defineConfig({
   },
   e2e: {
     setupNodeEvents(on, config) {
-      require('cypress-mochawesome-reporter/plugin')(on);
-      return config;
+      try {
+        // Register the Mochawesome reporter plugin
+        require('cypress-mochawesome-reporter/plugin')(on);
+
+        // Add task for logging
+        on('task', {
+          log(message) {
+            console.log(message);
+            return null;
+          }
+        });
+
+        // Add task for handling errors
+        on('task', {
+          error(message) {
+            console.error(message);
+            return null;
+          }
+        });
+
+        // Ensure required directories exist
+        const fs = require('fs');
+        const path = require('path');
+        
+        const dirs = [
+          'cypress/reports/mochawesome',
+          'cypress/reports/mochawesome/.jsons',
+          'cypress/screenshots',
+          'cypress/videos'
+        ];
+
+        dirs.forEach(dir => {
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+        });
+
+        return config;
+      } catch (error) {
+        console.error('Error in setupNodeEvents:', error);
+        throw error;
+      }
     },
     specPattern: 'cypress/e2e/Pipedrive/Web/tests/[0-9]*_*.cy.js',
     baseUrl: process.env.CYPRESS_BASE_URL || 'https://app.pipedrive.com',
@@ -38,13 +78,20 @@ module.exports = defineConfig({
       openMode: 0
     },
     screenshotsFolder: 'cypress/screenshots',
-    videosFolder: 'cypress/videos'
+    videosFolder: 'cypress/videos',
+    env: {
+      reporterEnabled: true,
+      screenshotsFolder: 'cypress/screenshots',
+      videosFolder: 'cypress/videos'
+    }
   },
   browserLaunchOptions: {
     args: [
       '--disable-gpu',
       '--disable-software-rasterizer',
       '--enable-unsafe-swiftshader',
+      '--no-sandbox',
+      '--disable-dev-shm-usage'
     ],
   }
 });
