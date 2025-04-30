@@ -39,4 +39,11 @@ module.exports = defineConfig({
     screenshotsFolder: 'cypress/screenshots',
     videosFolder: 'cypress/videos'
   },
+  browserLaunchOptions: {
+    args: [
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--enable-unsafe-swiftshader',
+    ],
+  }
 });
