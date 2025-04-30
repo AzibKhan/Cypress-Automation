@@ -88,65 +88,90 @@ npx cypress run
 
 ### Prerequisites
 - Docker Desktop installed and running
-- Docker Compose installed
 
 ### Running Tests with Docker
 
-1. **Using the Helper Script**:
-```bash
-# Make the script executable
-chmod +x run-cypress-docker.sh
-
-# Run all tests in headless mode
-./run-cypress-docker.sh
-
-# Open Cypress UI in Docker
-./run-cypress-docker.sh --open
-
-# Run tests matching a specific pattern
-./run-cypress-docker.sh --spec login
-
-# Show help
-./run-cypress-docker.sh --help
-```
-
-2. **Using Docker Compose Directly**:
-```bash
-# Build the Docker image
-docker-compose build
-
-# Run tests
-docker-compose run --rm cypress
-
-# Run a specific test file
-docker-compose run --rm cypress npx cypress run --spec "cypress/e2e/Pipedrive/Web/tests/01_login_test.cy.js"
-```
-
-3. **Using npm Scripts**:
+1. **Using npm Scripts**:
 ```bash
 # Run all tests in Chrome
-npm run test:chrome
+npm run docker:test:chrome
 
 # Run specific test file
-npm run test:login
+npm run docker:test:login
 
 # Run tests in all browsers
-npm run test:all-browsers
+npm run docker:test:all
 ```
 
-4. **Viewing Test Results**:
-Test results, screenshots, and videos will be available in your local project directory as they are mounted as volumes.
+2. **Using Docker Directly**:
+```bash
+# Run tests using the official Cypress Docker image
+docker run --rm \
+  -v "${PWD}:/e2e" \
+  -w /e2e \
+  -e CYPRESS_BASE_URL=$CYPRESS_BASE_URL \
+  -e CYPRESS_EMAIL=$CYPRESS_EMAIL \
+  -e CYPRESS_PASSWORD=$CYPRESS_PASSWORD \
+  cypress/included:12.17.4 \
+  --browser chrome \
+  --reporter mochawesome \
+  --reporter-options reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true
+```
 
-### Docker Configuration
-- `Dockerfile`: Defines the Cypress environment
-- `docker-compose.yml`: Configures the service and volumes
-- `.dockerignore`: Excludes unnecessary files from the build
-- `run-cypress-docker.sh`: Helper script for running tests with Docker
+3. **Viewing Test Results**:
+Test results, screenshots, and videos will be available in your local project directory as they are mounted as volumes.
 
 ## CI/CD Integration
 
 ### GitHub Actions
-The project uses GitHub Actions for CI/CD with Docker support. See `.github/workflows/github-workflow.yml` for configuration details.
+The project uses GitHub Actions for CI/CD with Docker support. The workflow includes:
+- Node.js setup with caching
+- Dependency installation
+- Test execution in Docker
+- Report generation
+- Artifact upload
+
+#### Workflow Details
+The GitHub workflow (`.github/workflows/github-workflow.yml`) performs the following steps:
+
+1. **Checkout Code**:
+   - Clones the repository
+   - Sets up the working directory
+
+2. **Node.js Setup**:
+   - Installs Node.js v18
+   - Configures npm caching for faster builds
+   - Installs project dependencies
+
+3. **Directory Setup**:
+   - Creates necessary directories for reports
+   - Sets up permissions for test artifacts
+   - Prepares the environment for test execution
+
+4. **Test Execution**:
+   - Runs Cypress tests in Docker container
+   - Uses the official Cypress Docker image
+   - Configures Mochawesome reporter
+   - Handles test failures gracefully
+
+5. **Report Generation**:
+   - Merges test reports from multiple runs
+   - Generates HTML reports using Mochawesome
+   - Creates a dummy report if no tests are executed
+   - Verifies report generation success
+
+6. **Artifact Management**:
+   - Uploads test reports as artifacts
+   - Archives screenshots on test failures
+   - Saves test execution videos
+   - Sets retention period for artifacts
+
+#### Workflow Triggers
+The workflow runs automatically on:
+- Push to main/master branches
+- Pull requests to main/master branches
+- Manual workflow dispatch
+- Scheduled runs (if configured)
 
 #### Required Secrets
 Add these secrets to your GitHub repository:
@@ -154,14 +179,12 @@ Add these secrets to your GitHub repository:
 - `CYPRESS_EMAIL`: Pipedrive login email
 - `CYPRESS_PASSWORD`: Pipedrive login password
 
-#### Workflow Configuration
-The GitHub workflow (`github-workflow.yml`) includes:
-- Docker Buildx setup with caching
-- Docker image building
-- Test execution in Docker
-- Report generation
-- Artifact upload
-- Quick test job for manual verification
+#### Workflow Artifacts
+The workflow generates and uploads the following artifacts:
+- Mochawesome HTML reports
+- Test failure screenshots
+- Test execution videos
+- Debug logs and error reports
 
 ### Jenkins Pipeline
 The project includes Jenkins pipeline configuration (`Jenkinsfile`) with the following features:
@@ -248,23 +271,26 @@ npm run generate:all-reports
    - Each test file focuses on a specific feature
 
 2. **Data Management**:
-   - Test data stored in fixture files
-   - Sensitive data managed through environment variables
-   - No hardcoded credentials in tests
+   - Use fixtures for test data
+   - Environment variables for sensitive data
+   - Separate test data from test logic
 
-3. **Error Handling**:
-   - Proper error messages and assertions
-   - Screenshots on failure
-   - Video recordings of test runs
-   - Detailed error reporting
+3. **Reporting**:
+   - Mochawesome reports for detailed test results
+   - Screenshots on test failures
+   - Video recordings for debugging
+
+4. **CI/CD Integration**:
+   - Automated test execution
+   - Report generation and archiving
+   - Failure notifications
 
 ## Troubleshooting
 
-### Common Issues
-1. **Login Failures**:
+1. **Docker Issues**:
+   - Ensure Docker is running
+   - Check volume mounting permissions
    - Verify environment variables
-   - Check network connectivity
-   - Ensure correct credentials
 
 2. **Test Failures**:
    - Check test reports
@@ -319,11 +345,11 @@ For issues or questions:
 ## Contributing
 
 1. Fork the repository
-2. Create feature branch
-3. Make changes
-4. Run tests
-5. Submit pull request
+2. Create a feature branch
+3. Make your changes
+4. Run tests locally
+5. Submit a pull request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the ISC License. 
