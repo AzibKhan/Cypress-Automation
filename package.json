@@ -36,7 +36,8 @@
     "preinstall": "npm install -g mochawesome-merge mochawesome-report-generator",
     "postinstall": "npm run verify:reports || true",
     "pretest": "npm run clean:reports",
-    "posttest": "npm run generate:all-reports"
+    "posttest": "npm run generate:all-reports",
+    "generate-reports": "docker run --rm -v \"${PWD}:/e2e\" -w /e2e cypress-automation bash -c \"npm install && echo 'Merging reports...' && npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged.json && echo 'Generating HTML report...' && npx mochawesome-report-generator cypress/reports/mochawesome/merged.json -o cypress/reports/mochawesome\""
   },
   "keywords": [
     "cypress",

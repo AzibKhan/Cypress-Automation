@@ -8,133 +8,47 @@ on:
   workflow_dispatch:
 
 jobs:
-  cypress-docker-run:
+  cypress-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      # - name: Setup Node.js
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '18'
-      #     cache: 'npm'
-
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+            
       - name: Install dependencies
+        run: npm ci
+        
+      - name: Create reports directory
         run: |
-          npm ci
-          npm install -g mochawesome-merge mochawesome-report-generator
-          npm list -g --depth=0
-
-      - name: Setup Docker
-        run: |
-          echo "Setting up Docker..."
-          curl -fsSL https://get.docker.com -o get-docker.sh
-          sudo sh get-docker.sh
-          sudo usermod -aG docker $USER
-          sudo systemctl start docker
-          sudo systemctl enable docker
-          docker --version
-          echo "Docker setup completed"
-
-      - name: Debug Dockerfile
-        run: |
-          echo "Listing Dockerfile content..."
-          cat Dockerfile || echo "Dockerfile not found"
-          echo "Checking current directory..."
-          ls -la
-          echo "Checking Docker context..."
-          find . -type f -name "Dockerfile" -o -name "docker-compose.yml"
-
-      - name: Build Docker image
-        run: |
-          echo "Building Docker image..."
-          docker build -t cypress-automation . --no-cache
-          echo "Verifying Docker image..."
-          docker images | grep cypress-automation
-          echo "Docker image built successfully"
-
-      - name: Create and verify directories
-        run: |
-          echo "Creating directories..."
+          mkdir -p cypress/reports/mochawesome
           mkdir -p cypress/reports/mochawesome/.jsons
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
-          echo "Directory structure:"
-          tree cypress || echo "tree command not available"
-          ls -R cypress
-
-      - name: Run Cypress tests in Docker container
-        run: |
-          echo "Running Cypress tests..."
-          echo "Environment variables:"
-          echo "CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL || 'http://localhost' }}"
-          echo "CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL || 'test@example.com' }}"
-          echo "CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD || 'password' }}"
-          
-          docker run --rm \
-            -v "${PWD}:/e2e" \
-            -w /e2e \
-            -e CYPRESS_BASE_URL=${{ secrets.CYPRESS_BASE_URL || 'http://localhost' }} \
-            -e CYPRESS_EMAIL=${{ secrets.CYPRESS_EMAIL || 'test@example.com' }} \
-            -e CYPRESS_PASSWORD=${{ secrets.CYPRESS_PASSWORD || 'password' }} \
-            cypress-automation bash -c "
-              npm install
-              echo 'Running Cypress tests with reporter configuration...'
-              npx cypress run --browser chrome --reporter mochawesome --reporter-options reportDir=cypress/reports/mochawesome,overwrite=false,html=false,json=true || exit 1
-            "
+        
+      - name: Run Cypress tests
+        run: npm run test:chrome
         continue-on-error: true
-
-      - name: Debug test results
-        if: always()
-        run: |
-          echo "Checking test results..."
-          echo "Contents of cypress/reports/mochawesome/.jsons:"
-          ls -la cypress/reports/mochawesome/.jsons || echo "No .jsons directory found"
-          echo "Contents of cypress/reports/mochawesome:"
-          ls -la cypress/reports/mochawesome || echo "No mochawesome directory found"
-          echo "Contents of cypress/screenshots:"
-          ls -la cypress/screenshots || echo "No screenshots directory found"
-          echo "Contents of cypress/videos:"
-          ls -la cypress/videos || echo "No videos directory found"
-
+        env:
+          CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
+          CYPRESS_EMAIL: ${{ secrets.CYPRESS_EMAIL }}
+          CYPRESS_PASSWORD: ${{ secrets.CYPRESS_PASSWORD }}
+          
       - name: Generate Mochawesome report
         if: always()
         run: |
-          echo "Generating Mochawesome report..."
-          docker run --rm \
-            -v "${PWD}:/e2e" \
-            -w /e2e \
-            cypress-automation bash -c "
-              npm install
-              if [ ! -d 'cypress/reports/mochawesome/.jsons' ]; then
-                mkdir -p cypress/reports/mochawesome/.jsons
-              fi
-              if [ -z \"$(ls -A cypress/reports/mochawesome/.jsons/*.json 2>/dev/null)\" ]; then
-                echo 'No test reports found, creating dummy report...'
-                echo '{"results":[{"suites":[{"tests":[{"title": "No tests executed","state": "skipped"}]}]}]}' > cypress/reports/mochawesome/.jsons/dummy.json
-              fi
-              echo 'Merging reports...'
-              npx mochawesome-merge cypress/reports/mochawesome/.jsons/*.json > cypress/reports/mochawesome/merged.json || exit 1
-              echo 'Generating HTML report...'
-              npx mochawesome-report-generator cypress/reports/mochawesome/merged.json -o cypress/reports/mochawesome || exit 1
-            "
-          echo "Report generation completed"
-
-      - name: Verify report generation
-        if: always()
-        run: |
-          echo "Verifying report generation..."
-          if [ -f "cypress/reports/mochawesome/report.html" ]; then
-            echo "Report generated successfully"
-          else
-            echo "Report generation failed"
-            echo "Contents of cypress/reports/mochawesome:"
-            ls -la cypress/reports/mochawesome
-            exit 1
-          fi
-
+          echo "Current directory structure:"
+          find cypress -type d
+          echo -e "\nGenerating reports..."
+          npm run merge:reports || echo "Failed to merge reports"
+          npm run generate:report || echo "Failed to generate report"
+          echo -e "\nReport directory contents:"
+          ls -R cypress/reports/mochawesome
       - name: Upload Mochawesome Report
         if: always()
         uses: actions/upload-artifact@v4
@@ -157,4 +71,4 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-          retention-days: 5
+          retention-days: 5 
