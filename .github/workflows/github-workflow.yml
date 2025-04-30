@@ -56,8 +56,20 @@ jobs:
             --config reporterOptions.overwrite=false \
             --config reporterOptions.html=false \
             --config reporterOptions.json=true \
+            --config screenshotOnRunFailure=true \
+            --config trashAssetsBeforeRuns=false \
             --browser chrome
         continue-on-error: true
+        
+      - name: Debug Screenshots
+        if: always()
+        run: |
+          echo "Checking screenshot directory..."
+          ls -la cypress/screenshots
+          echo "Checking screenshot contents..."
+          find cypress/screenshots -type f
+          echo "Checking screenshot permissions..."
+          ls -la cypress/screenshots/* 2>/dev/null || echo "No screenshots found"
         
       - name: Generate Mochawesome report
         if: always()
@@ -94,12 +106,13 @@ jobs:
           retention-days: 5
 
       - name: Upload Screenshots
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
           path: cypress/screenshots
           retention-days: 5
+          if-no-files-found: warn
 
       - name: Upload Videos
         if: always()
