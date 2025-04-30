@@ -13,31 +13,23 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: cypress/included:latest
-      options: --user 1001
-    timeout-minutes: 30
+      options: |
+        --user 1001
+        -v ${{ github.workspace }}:/e2e
+        -w /e2e
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Debug environment
-        run: |
-          echo "Current user: $(whoami)"
-          echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
-          echo "Node version: $(node -v)"
-          echo "NPM version: $(npm -v)"
-        
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           apt-get update
           apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-
+        
       - name: Install npm dependencies
         run: |
           npm ci
-          echo "Node modules installed successfully"
-          ls -la node_modules
+          npm cache verify
         
       - name: Create reports directory
         run: |
@@ -46,13 +38,9 @@ jobs:
           mkdir -p cypress/screenshots
           mkdir -p cypress/videos
           chmod -R 777 cypress
-          echo "Directory structure created:"
-          find cypress -type d
         
       - name: Run Cypress tests
-        run: |
-          echo "Starting Cypress tests..."
-          npm run test:chrome
+        run: npm run test:chrome
         continue-on-error: true
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
@@ -64,8 +52,6 @@ jobs:
         run: |
           echo "Current directory structure:"
           find cypress -type d
-          echo -e "\nChecking for JSON files:"
-          find cypress/reports/mochawesome/.jsons -type f
           echo -e "\nGenerating reports..."
           npm run merge:reports || echo "Failed to merge reports"
           npm run generate:report || echo "Failed to generate report"
@@ -94,4 +80,4 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-          retention-days: 5 
+          retention-days: 5
