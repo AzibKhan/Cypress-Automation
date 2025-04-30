@@ -16,8 +16,12 @@ require('cypress-xpath')
 // Import commands.js using ES2015 syntax:
 import './commands'
 
+// Import Mochawesome reporter
+import 'cypress-mochawesome-reporter/register'
+
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+// require('cypress-mochawesome-reporter/register')
 // Ignore ResizeObserver errors globally
 Cypress.on('uncaught:exception', (err) => {
     if (err.message.includes('ResizeObserver')) {
