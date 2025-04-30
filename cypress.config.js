@@ -1,4 +1,5 @@
 const { defineConfig } = require("cypress");
+const mochawesome = require('cypress-mochawesome-reporter/plugin');
 
 module.exports = defineConfig({
   projectId: 'mevvq9',
@@ -22,7 +23,7 @@ module.exports = defineConfig({
     setupNodeEvents(on, config) {
       try {
         // Register the Mochawesome reporter plugin
-        require('cypress-mochawesome-reporter/plugin')(on);
+        mochawesome(on);
 
         // Add task for logging
         on('task', {
@@ -56,6 +57,16 @@ module.exports = defineConfig({
             fs.mkdirSync(dir, { recursive: true });
           }
         });
+
+        // Verify plugin installation
+        try {
+          require.resolve('cypress-mochawesome-reporter/plugin');
+          console.log('Mochawesome reporter plugin found');
+        } catch (error) {
+          console.error('Mochawesome reporter plugin not found. Installing...');
+          const { execSync } = require('child_process');
+          execSync('npm install cypress-mochawesome-reporter --save-dev', { stdio: 'inherit' });
+        }
 
         return config;
       } catch (error) {
