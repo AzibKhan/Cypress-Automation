@@ -18,6 +18,8 @@ jobs:
         -v ${{ github.workspace }}:/e2e
         -w /e2e
     timeout-minutes: 30
+    env:
+      WORKSPACE_PATH: /home/runner/work/cypress-automation/cypress-automation
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,6 +32,7 @@ jobs:
           ls -la
           echo "Node version: $(node -v)"
           echo "NPM version: $(npm -v)"
+          echo "Workspace path: ${{ env.WORKSPACE_PATH }}"
         
       - name: Install system dependencies
         run: |
