@@ -53,15 +53,21 @@ describe('Pipedrive Contact Management', () => {
         });
     });
 
-    it('Should create a new contact with a custom label', () => {
+    it('Should create a new contact with a customize label', () => {
         cy.wrap(null).then(() => {
+            // Generate unique label name using timestamp
+            const timestamp = new Date().getTime();
+            const uniqueLabelName = `${testData.customLabel}_${timestamp}`;
+            
             contactPage.visit();
             contactPage.clickAddButton();
             contactPage.fillContactDetails('Custom Label Contact', testData.organization, testData.phoneNumber, testData.emailaddress);
             contactPage.selectOwner();
-            contactPage.addCustomLabel('VIP Client');
+            contactPage.addCustomLabel(uniqueLabelName);
             contactPage.saveContact();
-            cy.contains('Custom Label Contact', { timeout: 10000 }).should('be.visible');
+            //cy.contains('Custom Label Contact', { timeout: 10000 }).should('be.visible');
+            // Verify the custom label is present
+            cy.contains('Custom Label Contact').should('be.visible');
         });
     });
 
@@ -174,7 +180,7 @@ describe('Pipedrive Contact Management', () => {
         });
     });
     
-    it.only('Should delete all the contacts', () => {
+    it('Should delete all the contacts', () => {
         cy.wrap(null).then(() => {
             // Use the Page Object Model to delete the contact
             contactPage.deleteContact();

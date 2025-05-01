@@ -10,6 +10,14 @@ describe('Pipedrive Login Test', () => {
         });
     });
 
+    // Test for successful login    
+    it('User should be able to login successfully', () => {
+        LoginPage.fillEmail(userData.email);
+        LoginPage.fillPassword(userData.password);
+        LoginPage.submit();
+        cy.url().should('include', '1/user/everyone');
+    });
+
     // Test for invalid email format
     it('Should show error for invalid email format', () => {
         LoginPage.fillEmail('invalid-email');
@@ -44,11 +52,5 @@ describe('Pipedrive Login Test', () => {
         cy.contains('Please add your email').should('be.visible');
         cy.contains('Please add your password').should('be.visible');
     });
-    // Test for successful login    
-    it('User should be able to login successfully', () => {
-        LoginPage.fillEmail(userData.email);
-        LoginPage.fillPassword(userData.password);
-        LoginPage.submit();
-        cy.url().should('include', '1/user/everyone');
-    });
+  
 });

@@ -24,7 +24,6 @@ This project contains automated tests for the Pipedrive application using Cypres
 │   │               ├── 01_login_test.cy.js
 │   │               └── 02_contact_test.cy.js
 │   ├── fixtures/              # Test data
-│   ├── support/               # Support files and custom commands
 │   ├── reports/              # Test reports
 │   │   └── mochawesome/     # Mochawesome reports
 │   ├── screenshots/         # Test failure screenshots
