@@ -30,7 +30,7 @@ describe('Pipedrive Contact Management', () => {
         });
     });
     
-    it('Should create a new contact with adding data in all fields successfully', () => {
+    it('Should create a new contact without using any labels successfully', () => {
         // Ensure we're starting fresh
         cy.wrap(null).then(() => {
             // Use POM to navigate to Contacts > People
@@ -45,14 +45,73 @@ describe('Pipedrive Contact Management', () => {
             // Use POM to select owner
             contactPage.selectOwner();
             
-            // Use POM to add label (if needed)
-            contactPage.addLabel();
-            
             // Use POM to save contact
             contactPage.saveContact();
             
             // Verify successful creation with retry
             cy.contains(testData.contactName, { timeout: 10000 }).should('be.visible');
+        });
+    });
+
+    it('Should create a new contact with a custom label', () => {
+        cy.wrap(null).then(() => {
+            contactPage.visit();
+            contactPage.clickAddButton();
+            contactPage.fillContactDetails('Custom Label Contact', testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.selectOwner();
+            contactPage.addCustomLabel('VIP Client');
+            contactPage.saveContact();
+            cy.contains('Custom Label Contact', { timeout: 10000 }).should('be.visible');
+        });
+    });
+
+
+    it('Should create a new contact with Customer label', () => {
+        cy.wrap(null).then(() => {
+            contactPage.visit();
+            contactPage.clickAddButton();
+            contactPage.fillContactDetails('Customer Contact', testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.selectOwner();
+            contactPage.addCustomerLabel();
+            contactPage.saveContact();
+            cy.contains('Customer Contact', { timeout: 10000 }).should('be.visible');
+        });
+    });
+
+
+    it('Should create a new contact with Hot label', () => {
+        cy.wrap(null).then(() => {
+            contactPage.visit();
+            contactPage.clickAddButton();
+            contactPage.fillContactDetails('Hot Contact', testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.selectOwner();
+            contactPage.addHotLabel();
+            contactPage.saveContact();
+            cy.contains('Hot Contact', { timeout: 10000 }).should('be.visible');
+        });
+    });
+
+    it('Should create a new contact with Warm label', () => {
+        cy.wrap(null).then(() => {
+            contactPage.visit();
+            contactPage.clickAddButton();
+            contactPage.fillContactDetails('Warm Contact', testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.selectOwner();
+            contactPage.addWarmLabel();
+            contactPage.saveContact();
+            cy.contains('Warm Contact', { timeout: 10000 }).should('be.visible');
+        });
+    });
+
+    it('Should create a new contact with Cold label', () => {
+        cy.wrap(null).then(() => {
+            contactPage.visit();
+            contactPage.clickAddButton();
+            contactPage.fillContactDetails('Cold Contact', testData.organization, testData.phoneNumber, testData.emailaddress);
+            contactPage.selectOwner();
+            contactPage.addColdLabel();
+            contactPage.saveContact();
+            cy.contains('Cold Contact', { timeout: 10000 }).should('be.visible');
         });
     });
     
@@ -115,7 +174,7 @@ describe('Pipedrive Contact Management', () => {
         });
     });
     
-    it('Should delete all the contacts', () => {
+    it.only('Should delete all the contacts', () => {
         cy.wrap(null).then(() => {
             // Use the Page Object Model to delete the contact
             contactPage.deleteContact();

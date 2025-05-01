@@ -21,6 +21,14 @@ class ContactPage {
     get ownerSelect() { return cy.get('[data-test-key="owner_id"]'); }
     get ownerOption() { return cy.contains('Azib Khan (You)'); }
     get labelSelect() { return cy.get('[data-testid="labels-select"]'); }
+    get customerLabel() { return cy.get(':nth-child(1) > :nth-child(1) > [data-testid="labels-option-badge"]'); }
+    get hotLabel() { return cy.get(':nth-child(2) > :nth-child(1) > [data-testid="labels-option-badge"] > .ff_v11321__LabelsSelect-option__content__Kro > .cui5-label') }
+    get warmLabel() { return cy.get(':nth-child(3) > :nth-child(1) > [data-testid="labels-option-badge"]'); }
+    get coldLabel() { return cy.get(':nth-child(4) > :nth-child(1) > [data-testid="labels-option-badge"]'); }
+    get addNewLabel() { return cy.get('[data-testid="labels-add-new-button"]'); }
+    get newLabelName() { return cy.get('[data-testid="labels-edit-input"]'); }
+    get selectNewLabel() { return cy.get(':nth-child(5) > :nth-child(1) > [data-testid="labels-option-badge"]'); }
+    get newLabelSaveButton() { return cy.get('[data-testid="labels-save-button"] > .cui5-button__label'); }
     get saveButton() { return cy.contains('button', 'Save'); }
     
     // Delete Contact Selectors
@@ -104,11 +112,44 @@ class ContactPage {
         this.ownerOption.should('be.visible').click();
     }
 
-    addLabel() {
+    // Label Methods
+    addCustomerLabel() {
         cy.wait(500);
         this.labelSelect.should('be.visible').click();
-        cy.get('body').click(0, 0);
+        this.customerLabel.should('be.visible').click();
     }
+
+    addHotLabel() {
+        cy.wait(500);
+        this.labelSelect.should('be.visible').click();
+        this.hotLabel.should('be.visible').click();
+    }
+
+    addWarmLabel() {
+        cy.wait(500);
+        this.labelSelect.should('be.visible').click();
+        this.warmLabel.should('be.visible').click();
+    }
+
+    addColdLabel() {
+        cy.wait(500);
+        this.labelSelect.should('be.visible').click();
+        this.coldLabel.should('be.visible').click();
+    }
+
+    // Method for creating and adding a custom label
+    addCustomLabel(labelName) {
+        cy.wait(500);
+        this.labelSelect.should('be.visible').click();
+        this.addNewLabel.should('be.visible').click();
+        this.newLabelName.should('be.visible').type(labelName);
+        this.newLabelSaveButton.should('be.visible').click();
+        // Wait for the new label to be added
+        cy.wait(500);
+        // Select the newly created label
+        this.selectNewLabel.should('be.visible').click();
+    }
+
 
     saveContact() {
         cy.wait(500);
@@ -160,12 +201,12 @@ class ContactPage {
     
         // Click delete and confirm
         this.clickDeleteAndConfirm();
+
+        cy.wait(1000);
     
         // Verify success message
         cy.contains('deleted successfully', { timeout: 5000 }).should('be.visible');
-    
-        };
-    
+    }
 
     // Verification Methods
     verifyContactCreation(contactName) {
@@ -181,7 +222,6 @@ class ContactPage {
         this.clickAddButton();
         this.fillContactDetails(contactName, organization, phoneNumber, emailAddress);
         this.selectOwner();
-        this.addLabel();
         this.saveContact();
         this.verifyContactCreation(contactName);
     }
